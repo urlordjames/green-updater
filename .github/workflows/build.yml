@@ -9,6 +9,9 @@ jobs:
     steps:
     - uses: "actions/checkout@v2"
 
+    - name: "dependencies"
+      run: "vcpkg install gtk:x64-windows"
+
     - name: "build"
       run: "cargo build --release"
 
