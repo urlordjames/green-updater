@@ -60,7 +60,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 				set_orientation: gtk::Orientation::Vertical,
 
 				append = &gtk::Label {
-					set_label: "green updater\n(licensed under GPL-3.0 or later, code: https://github.com/urlordjames/green-updater)",
+					set_markup: "<a href=\"https://github.com/urlordjames/green-updater\">green updater</a>\n(licensed under GPL-3.0 or later)",
 					set_wrap: true,
 					set_justify: gtk::Justification::Center,
 					set_margin_bottom: 25
