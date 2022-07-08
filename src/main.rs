@@ -60,6 +60,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
 				set_orientation: gtk::Orientation::Vertical,
 
 				append = &gtk::Label {
+					set_label: "green updater\n(licensed under GPL-3.0 or later, code: https://github.com/urlordjames/green-updater)",
+					set_wrap: true,
+					set_justify: gtk::Justification::Center,
+					set_margin_bottom: 25
+				},
+				append = &gtk::Label {
 					set_label: "select a Minecraft folder\n(you can ignore this if you use the default Minecraft installer)",
 					set_wrap: true,
 					set_justify: gtk::Justification::Center
