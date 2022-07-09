@@ -72,10 +72,14 @@ jobs:
         command: build
         args: --release
 
+    - name: "prepare distribution folder"
+      run: |
+        "mkdir dist"
+        "copy target/release/green-updater.exe dist"
+        "copy C:/gnome/lib/*.dll dist"
+
     - uses: "actions/upload-artifact@v3"
       with:
         name: "windows"
-        path: |
-          "target/release/*.exe"
-          "C:/gnome/lib/*.dll"
+        path: "dist"
         if-no-files-found: error
