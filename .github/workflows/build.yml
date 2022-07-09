@@ -8,7 +8,7 @@ jobs:
   build-windows:
     runs-on: "windows-latest"
     env:
-      PKG_CONFIG_PATH: "C:\gnome\lib\pkgconfig"
+      PKG_CONFIG_PATH: "C:\\gnome\\lib\\pkgconfig"
 
     steps:
     - uses: actions/checkout@v2
