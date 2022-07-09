@@ -1,7 +1,6 @@
 pub fn minecraft_path() -> std::path::PathBuf {
 	if cfg!(target_os = "windows") {
-		println!("WARNING: STUB IMPLEMENTATION OF WINDOWS MINECRAFT PATH!");
-		std::path::PathBuf::from("C:/fake_dir")
+		todo!("windows implementation");
 	} else if cfg!(target_os = "macos") {
 		todo!("macos implementation");
 	} else {
