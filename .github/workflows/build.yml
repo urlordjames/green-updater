@@ -43,14 +43,17 @@ jobs:
 
     - name: "Setup Python"
       uses: actions/setup-python@v2
+      if: steps.cache.outputs.cache-hit != 'true'
       with:
         python-version: "3.x"
 
     - name: "Install Python Dependencies"
+      if: steps.cache.outputs.cache-hit != 'true'
       run: pip install meson ninja
 
     - name: "Setup MSVC"
       uses: bus1/cabuild/action/msdevshell@v1
+      if: steps.cache.outputs.cache-hit != 'true'
       with:
         architecture: x64
 
