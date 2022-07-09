@@ -12,14 +12,11 @@ jobs:
     - name: "install pkg-config"
       run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-pkg-config --noconfirm\""
 
-    - name: "add pkg-config to path"
-      run: "$Env:path += \";C:/msys64/mingw64/bin/\""
+    - name: "add pkg-config to PKG_CONFIG_PATH"
+      run: "$Env:PKG_CONFIG_PATH += \";C:/msys64/mingw64/bin/pkg-config.exe\""
 
-    - name: "test pkg-config"
-      run: "pkg-config --help"
-
-    - name: "install gtk"
-      run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-gtk4 --noconfirm\""
+    #- name: "install gtk"
+    #  run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-gtk4 --noconfirm\""
 
     - name: "build"
       run: "cargo build --release"
