@@ -75,8 +75,8 @@ jobs:
     - name: "prepare distribution folder"
       run: |
         "mkdir dist"
-        "copy target/release/green-updater.exe dist/green-updater.exe"
-        "copy C:/gnome/lib dist/lib -recurse"
+        "copy target/release/green-updater.exe -Destination dist"
+        "copy C:/gnome/lib/*.dll -Destination dist -Recurse"
         "dir dist"
 
     - uses: "actions/upload-artifact@v3"
