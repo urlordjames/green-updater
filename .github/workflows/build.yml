@@ -37,7 +37,7 @@ jobs:
 
     - name: "Clone GTK"
       working-directory: /
-      if: steps.cache.outputs.cache-hit != "true"
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         git clone "https://gitlab.gnome.org/GNOME/gtk.git" --depth 1
 
@@ -56,7 +56,7 @@ jobs:
 
     - name: "Prepare GTK build"
       working-directory: /gtk
-      if: steps.cache.outputs.cache-hit != "true"
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         meson setup builddir --prefix=C:/gnome -Dbuild-tests=false -Dmedia-gstreamer=disabled -Dbuild-examples=false
 
