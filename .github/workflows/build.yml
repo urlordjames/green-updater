@@ -77,9 +77,10 @@ jobs:
         "mkdir dist"
         "copy target/release/green-updater.exe dist"
         "copy C:/gnome/lib/*.dll dist"
+        "dir dist"
 
     - uses: "actions/upload-artifact@v3"
       with:
         name: "windows"
-        path: "dist"
+        path: "dist/*"
         if-no-files-found: error
