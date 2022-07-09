@@ -77,8 +77,7 @@ jobs:
         mkdir dist
         cp target/release/green-updater.exe dist
         cp C:/gnome/bin/*.dll dist -r
-        ls
-        ls dist
+        cp C:/gnome/share/glib-2.0/schemas/gschemas.compiled dist
       shell: bash
 
     - uses: "actions/upload-artifact@v3"
