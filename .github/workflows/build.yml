@@ -9,11 +9,17 @@ jobs:
     steps:
     - uses: "actions/checkout@v2"
 
-    - name: "dependencies"
-      run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-gtk4 mingw-w64-x86_64-pkg-config --noconfirm\""
+    - name: "install pkg-config"
+      run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-pkg-config --noconfirm\""
 
     - name: "add pkg-config to path"
       run: "$Env:path += \";C:/msys64/mingw64/bin/\""
+
+    - name: "test pkg-config"
+      run: "pkg-config --help"
+
+    - name: "install gtk"
+      run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-gtk4 --noconfirm\""
 
     - name: "build"
       run: "cargo build --release"
