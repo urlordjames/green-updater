@@ -24,8 +24,7 @@ WriteUninstaller $INSTDIR\uninstaller.exe
 SectionEnd
 
 Section "Uninstall"
-Delete $INSTDIR\dist\*
-RMDir $INSTDIR\dist
+RMDir /r $INSTDIR\dist
 Delete $INSTDIR\uninstaller.exe
 
 RMDir $INSTDIR
