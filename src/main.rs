@@ -1,5 +1,3 @@
-#![windows_subsystem = "windows"]
-
 use gtk::prelude::*;
 use relm4::*;
 use std::path::PathBuf;
