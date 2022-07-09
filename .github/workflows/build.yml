@@ -10,7 +10,7 @@ jobs:
     - uses: "actions/checkout@v2"
 
     - name: "install pkg-config"
-      run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-pkg-config --noconfirm\""
+      run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-pkg-config dos2unix --noconfirm\""
 
     - name: "add pkg-config to PKG_CONFIG_PATH"
       run: "$Env:PKG_CONFIG_PATH += \"C:/msys64/mingw64/bin/pkg-config.exe\""
