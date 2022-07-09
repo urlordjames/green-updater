@@ -74,11 +74,11 @@ jobs:
 
     - name: "prepare distribution folder"
       run: |
-        "mkdir dist"
-        "cp target/release/green-updater.exe dist"
-        "cp C:/gnome/lib/*.dll dist -r"
-        "ls"
-        "ls dist"
+        mkdir dist
+        cp target/release/green-updater.exe dist
+        cp C:/gnome/lib/*.dll dist -r
+        ls
+        ls dist
       shell: bash
 
     - uses: "actions/upload-artifact@v3"
