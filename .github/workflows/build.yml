@@ -77,7 +77,7 @@ jobs:
 
     - name: "prepare distribution folder"
       run: |
-        mkdir dist/lib -p
+        mkdir dist/share/glib-2.0 -p
         cp target/release/green-updater.exe dist
         cp C:/gnome/bin/*.dll dist -r
         cp C:/gnome/share/glib-2.0/schemas dist/share/glib-2.0/schemas -r
