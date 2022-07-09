@@ -87,8 +87,17 @@ jobs:
         scoop install nsis
         makensis -VERSION
 
+    - name: "make installer"
+      run: makensis installer.nsi
+
     - uses: "actions/upload-artifact@v3"
       with:
         name: "windows"
         path: "dist/*"
+        if-no-files-found: error
+
+    - uses: "actions/upload-artifact@v3"
+      with:
+        name: "windows installer"
+        path: "green-installer.exe"
         if-no-files-found: error
