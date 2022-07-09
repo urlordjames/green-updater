@@ -31,7 +31,7 @@ impl AsyncComponentUpdate<AppModel> for WorkerModel {
 						remote_directory.upgrade_game_folder(&download_path).await;
 
 						println!("successfully upgraded game folder");
-						send!(parent_sender, AppMsg::UnlockUpgrade);
+						send!(parent_sender, AppMsg::FinishedUpgrade);
 					},
 					None => panic!("invalid manifest")
 				}

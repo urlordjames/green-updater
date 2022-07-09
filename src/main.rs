@@ -13,14 +13,14 @@ mod util;
 struct AppModel {
 	url: url::Url,
 	mc_path: PathBuf,
-	update_active: bool
+	currently_upgrading: bool
 }
 
 enum AppMsg {
 	Open,
 	SetMCPath(PathBuf),
 	Upgrade,
-	UnlockUpgrade
+	FinishedUpgrade
 }
 
 impl Model for AppModel {
@@ -39,11 +39,11 @@ impl AppUpdate for AppModel {
 				self.mc_path = path;
 			},
 			AppMsg::Upgrade => {
-				self.update_active = false;
+				self.currently_upgrading = true;
 				send!(components.worker, WorkerMsg::Upgrade((self.url.clone(), self.mc_path.clone())));
 			},
-			AppMsg::UnlockUpgrade => {
-				self.update_active = true;
+			AppMsg::FinishedUpgrade => {
+				self.currently_upgrading = false;
 			}
 		};
 
@@ -75,7 +75,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 					connect_clicked(sender) => move |_| {
 						send!(sender, AppMsg::Open);
 					},
-					set_sensitive: watch! { model.update_active }
+					set_sensitive: watch! { !model.currently_upgrading }
 				},
 				append = &gtk::Label {
 					set_label: watch! { &format!("target Minecraft folder: {:?}", model.mc_path) }
@@ -85,7 +85,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
 					connect_clicked(sender) => move |_| {
 						send!(sender, AppMsg::Upgrade);
 					},
-					set_sensitive: watch! { model.update_active }
+					set_sensitive: watch! { !model.currently_upgrading }
+				},
+				append = &gtk::Spinner {
+					set_spinning: watch! { model.currently_upgrading }
 				}
 			}
 		}
@@ -114,7 +117,7 @@ fn main() {
 	let model = AppModel {
 		url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest.json").unwrap(),
 		mc_path: util::minecraft_path(),
-		update_active: true
+		currently_upgrading: false
 	};
 
 	let app = RelmApp::new(model);
