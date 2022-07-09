@@ -80,6 +80,13 @@ jobs:
         cp C:/gnome/share dist/share -r
       shell: bash
 
+    - name: "install nsis"
+      run: |
+        Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://get.scoop.sh")
+        scoop bucket add extras
+        scoop install nsis
+        makensis -VERSION
+
     - uses: "actions/upload-artifact@v3"
       with:
         name: "windows"
