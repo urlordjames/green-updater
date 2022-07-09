@@ -13,7 +13,7 @@ Name "Green Updater"
 OutFile "green-installer.exe"
 RequestExecutionLevel user
 
-InstallDir $DESKTOP\test
+InstallDir "$DOCUMENTS\Green Updater"
 
 Section
 SetOutPath $INSTDIR
