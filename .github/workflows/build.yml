@@ -10,7 +10,7 @@ jobs:
     - uses: "actions/checkout@v2"
 
     - name: "install gtk"
-      run: "vcpkg install gtk4:x64-windows"
+      run: "vcpkg install gtk:x64-windows"
 
     - name: "build"
       run: "cargo build --release"
