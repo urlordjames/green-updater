@@ -13,7 +13,7 @@ jobs:
       run: "C:\\msys64\\usr\\bin\\bash -lc \"pacman -S mingw-w64-x86_64-gtk4 mingw-w64-x86_64-pkg-config --noconfirm\""
 
     - name: "add pkg-config to path"
-      run: "$Env:path += \";C:\\msys64\\pkgconfig\\bin\""
+      run: "$Env:path += \";C:/msys64/mingw64/bin/\""
 
     - name: "build"
       run: "cargo build --release"
