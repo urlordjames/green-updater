@@ -19,11 +19,14 @@ Section
 SetOutPath $INSTDIR
 
 File /r dist
+CreateShortcut "$SMPROGRAMS\Green Updater.lnk" "$INSTDIR\dist\green-updater.exe"
 
 WriteUninstaller $INSTDIR\uninstaller.exe
 SectionEnd
 
 Section "Uninstall"
+Delete "$SMPROGRAMS\Green Updater.lnk"
+
 RMDir /r $INSTDIR\dist
 Delete $INSTDIR\uninstaller.exe
 
