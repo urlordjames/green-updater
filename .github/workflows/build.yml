@@ -20,6 +20,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gtk4
 
+    - name: "list gnome stuff"
+      run: |
+        ls "C:\gnome" -lR
+      shell: bash
+
     - name: "Set up the PATH environment"
       run: |
         echo "C:\pkg-config-lite-0.28-1\bin" >> $GITHUB_PATH
