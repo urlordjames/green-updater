@@ -76,6 +76,6 @@ jobs:
       with:
         name: "windows"
         path: |
-          "target/release/green-updater.exe"
+          "target/release/*.exe"
           "C:/gnome/lib/*.dll"
         if-no-files-found: error
