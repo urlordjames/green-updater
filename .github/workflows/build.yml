@@ -75,4 +75,6 @@ jobs:
     - uses: "actions/upload-artifact@v2"
       with:
         name: "windows"
-        path: "target/release/green-updater.exe"
+        path: |
+          "target/release/green-updater.exe"
+          "C:/gnome/lib/*.dll"
