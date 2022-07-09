@@ -78,3 +78,4 @@ jobs:
         path: |
           "target/release/green-updater.exe"
           "C:/gnome/lib/*.dll"
+        if-no-files-found: error
