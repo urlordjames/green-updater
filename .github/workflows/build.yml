@@ -116,5 +116,5 @@ jobs:
     - uses: "actions/upload-artifact@v3"
       with:
         name: "macos"
-        path: "target/release"
+        path: "target/release/green-updater"
         if-no-files-found: error
