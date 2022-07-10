@@ -117,7 +117,7 @@ jobs:
       run: |
         mkdir dist
         cp target/release/green-updater dist
-        ldd dist/green-updater
+        otool -L dist/green-updater
         cp /usr/local/opt/glib/lib/*.dylib dist
         cp /usr/local/opt/gtk4/lib/*.dylib dist
 
