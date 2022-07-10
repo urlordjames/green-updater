@@ -125,6 +125,7 @@ jobs:
         cp /usr/local/opt/cairo/lib/*.dylib dist
         cp /usr/local/opt/graphene/lib/*.dylib dist
         cp /usr/local/opt/gettext/lib/*.dylib dist
+        cp /usr/local/opt/libffi/lib/*.dylib dist
         echo "DYLD_LIBRARY_PATH=. ./green-updater" > dist/launch.sh
         chmod +x dist/launch.sh
 
