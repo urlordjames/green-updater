@@ -107,6 +107,12 @@ jobs:
     - name: "dependencies"
       run: "brew install gtk4 pkg-config"
 
+    - name: "attempt to find gtk files"
+      run: "ls /usr/local/opt -lR"
+
+    - name: "attempt to find gtk files in another path"
+      run: "ls /usr/local/lib -lR"
+
     - name: "build"
       uses: actions-rs/cargo@v1
       with:
