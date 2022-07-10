@@ -107,14 +107,20 @@ jobs:
     - name: "dependencies"
       run: "brew install gtk4 pkg-config"
 
-    - name: "build"
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
-
     - uses: "actions/upload-artifact@v3"
       with:
-        name: "macos"
-        path: "target/release/green-updater"
+        name: "homebrew stuff"
+        path: "/usr/local/opt/*"
         if-no-files-found: error
+
+    #- name: "build"
+    #  uses: actions-rs/cargo@v1
+    #  with:
+    #    command: build
+    #    args: --release
+
+    #- uses: "actions/upload-artifact@v3"
+    #  with:
+    #    name: "macos"
+    #    path: "target/release/green-updater"
+    #    if-no-files-found: error
