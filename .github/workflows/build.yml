@@ -100,6 +100,8 @@ jobs:
 
   build-macos:
     runs-on: "macos-latest"
+
+    steps:
     - name: "dependencies"
       run: "brew install gtk4 pkg-config"
 
