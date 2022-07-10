@@ -58,6 +58,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 	view! {
 		gtk::ApplicationWindow {
 			set_title: Some("green-updater"),
+			set_decorated: cfg!(not(target_os = "windows")),
 			set_child = Some(&gtk::Box) {
 				set_orientation: gtk::Orientation::Vertical,
 
