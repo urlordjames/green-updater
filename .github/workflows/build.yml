@@ -113,16 +113,8 @@ jobs:
         command: build
         args: --release
 
-    - name: "prepare dist folder"
-      run: |
-        mkdir dist
-        cp target/release/green-updater dist
-        otool -L dist/green-updater
-        cp /usr/local/opt/glib/lib/*.dylib dist
-        cp /usr/local/opt/gtk4/lib/*.dylib dist
-
     - uses: "actions/upload-artifact@v3"
       with:
         name: "macos"
-        path: "dist/*"
+        path: "target/release/green-updater"
         if-no-files-found: error
