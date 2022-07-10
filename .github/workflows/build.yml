@@ -117,7 +117,7 @@ jobs:
       run: |
         mkdir dist
         cp target/release/green-updater dist
-        cp /usr/local/opt/*/lib/*.dylib dist
+        cp /usr/local/opt/*/lib/*.dylib dist || true
         echo "#!/bin/sh\nDYLD_LIBRARY_PATH=. ./green-updater" > dist/launch.sh
         chmod +x dist/launch.sh
 
