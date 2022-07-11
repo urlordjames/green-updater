@@ -97,32 +97,3 @@ jobs:
         name: "windows installer"
         path: "green-installer.exe"
         if-no-files-found: error
-
-  build-macos:
-    runs-on: "macos-latest"
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: "dependencies"
-      run: "brew install gtk4 pkg-config"
-
-    - name: "build"
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
-
-    - name: "prepare dist folder"
-      run: |
-        mkdir dist
-        cp target/release/green-updater dist
-        cp /usr/local/opt/*/lib/*.dylib dist || true
-        echo "#!/bin/sh\nDYLD_LIBRARY_PATH=. ./green-updater" > dist/launch.sh
-        chmod +x dist/launch.sh
-
-    - uses: "actions/upload-artifact@v3"
-      with:
-        name: "macos"
-        path: "dist/*"
-        if-no-files-found: error
