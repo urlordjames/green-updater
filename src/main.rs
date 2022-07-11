@@ -10,7 +10,7 @@ use mc_select::{MCSelectModel, MCSelectMsg};
 mod worker;
 use worker::{WorkerModel, WorkerMsg};
 
-mod util;
+use green_lib::util;
 
 struct AppModel {
 	url: url::Url,
