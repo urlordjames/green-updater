@@ -28,7 +28,7 @@ impl AsyncComponentUpdate<AppModel> for WorkerModel {
 				match remote_directory {
 					Some(remote_directory) => {
 						println!("valid manifest, attempting upgrade...");
-						remote_directory.upgrade_game_folder(&download_path).await;
+						remote_directory.upgrade_game_folder(&download_path, |_| {}, || {}).await;
 
 						println!("successfully upgraded game folder");
 						send!(parent_sender, AppMsg::FinishedUpgrade);
