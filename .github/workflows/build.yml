@@ -12,6 +12,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: "login to AWS"
+      uses: "aws-actions/configure-aws-credentials@v1"
+      with:
+        aws-region: us-east-2
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
     - uses: actions/cache@v1
       id: cache
       with:
@@ -97,13 +105,6 @@ jobs:
         name: "windows installer"
         path: "green-installer.exe"
         if-no-files-found: error
-
-    - name: "login to AWS"
-      uses: "aws-actions/configure-aws-credentials@v1"
-      with:
-        aws-region: us-east-2
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: "upload installer to S3"
       run: aws s3 cp green-installer.exe s3://green-updater/green-installer.exe
