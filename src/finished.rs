@@ -45,6 +45,7 @@ impl Widgets<FinishedModel, AppModel> for FinishedWidgets {
 			set_text: Some("upgrade finished"),
 			set_visible: watch!{ model.visible },
 			set_transient_for: parent!(Some(&parent_widgets.root_widget())),
+			set_deletable: false,
 			add_button: args!("dismiss", gtk::ResponseType::Close),
 			connect_response(sender) => move |_, resp| {
 				match resp {
