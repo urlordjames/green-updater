@@ -56,8 +56,8 @@ impl AppUpdate for AppModel {
 				match notify_rust::Notification::new()
 					.summary("green updater finished upgrade")
 					.show() {
-					Ok(handle) => {
-						handle.on_close(|| send!(sender, AppMsg::FinishDismissed));
+					Ok(_) => {
+						send!(sender, AppMsg::FinishDismissed);
 					},
 					Err(_) => {
 						send!(components.finished, FinishedMsg::Finished);
