@@ -10,19 +10,24 @@ use mc_select::{MCSelectModel, MCSelectMsg};
 mod worker;
 use worker::{WorkerModel, WorkerMsg};
 
+mod finished;
+use finished::{FinishedModel, FinishedMsg};
+
 use green_lib::util;
 
 struct AppModel {
 	url: url::Url,
 	mc_path: PathBuf,
-	currently_upgrading: bool
+	buttons_work: bool,
+	spinning: bool
 }
 
 enum AppMsg {
 	Open,
 	SetMCPath(PathBuf),
 	Upgrade,
-	FinishedUpgrade
+	FinishedUpgrade,
+	FinishDismissed
 }
 
 impl Model for AppModel {
@@ -41,11 +46,16 @@ impl AppUpdate for AppModel {
 				self.mc_path = path;
 			},
 			AppMsg::Upgrade => {
-				self.currently_upgrading = true;
+				self.buttons_work = false;
+				self.spinning = true;
 				send!(components.worker, WorkerMsg::Upgrade((self.url.clone(), self.mc_path.clone())));
 			},
 			AppMsg::FinishedUpgrade => {
-				self.currently_upgrading = false;
+				self.spinning = false;
+				send!(components.finished, FinishedMsg::Finished);
+			},
+			AppMsg::FinishDismissed => {
+				self.buttons_work = true;
 			}
 		};
 
@@ -77,7 +87,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 					connect_clicked(sender) => move |_| {
 						send!(sender, AppMsg::Open);
 					},
-					set_sensitive: watch! { !model.currently_upgrading }
+					set_sensitive: watch! { model.buttons_work }
 				},
 				append = &gtk::Label {
 					set_label: watch! { &format!("target Minecraft folder: {:?}", model.mc_path) }
@@ -87,10 +97,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
 					connect_clicked(sender) => move |_| {
 						send!(sender, AppMsg::Upgrade);
 					},
-					set_sensitive: watch! { !model.currently_upgrading }
+					set_sensitive: watch! { model.buttons_work }
 				},
 				append = &gtk::Spinner {
-					set_spinning: watch! { model.currently_upgrading }
+					set_spinning: watch! { model.spinning }
 				}
 			}
 		}
@@ -99,19 +109,22 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 struct AppComponents {
 	mc_select: RelmComponent<MCSelectModel, AppModel>,
-	worker: AsyncRelmWorker<WorkerModel, AppModel>
+	worker: AsyncRelmWorker<WorkerModel, AppModel>,
+	finished: RelmComponent<FinishedModel, AppModel>
 }
 
 impl Components<AppModel> for AppComponents {
 	fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-		AppComponents {
+		Self {
 			mc_select: RelmComponent::new(parent_model, parent_sender.clone()),
-			worker: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender)
+			worker: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender.clone()),
+			finished: RelmComponent::new(parent_model, parent_sender)
 		}
 	}
 
 	fn connect_parent(&mut self, parent_widgets: &AppWidgets) {
 		self.mc_select.connect_parent(parent_widgets);
+		self.finished.connect_parent(parent_widgets);
 	}
 }
 
@@ -119,7 +132,8 @@ fn main() {
 	let model = AppModel {
 		url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest.json").unwrap(),
 		mc_path: util::minecraft_path(),
-		currently_upgrading: false
+		buttons_work: true,
+		spinning: false
 	};
 
 	let app = RelmApp::new(model);

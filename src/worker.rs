@@ -2,7 +2,7 @@ use relm4::*;
 
 use crate::{AppModel, AppMsg};
 
-pub struct WorkerModel {}
+pub struct WorkerModel;
 
 pub enum WorkerMsg {
 	Upgrade((url::Url, std::path::PathBuf))
@@ -17,7 +17,7 @@ impl Model for WorkerModel {
 #[async_trait]
 impl AsyncComponentUpdate<AppModel> for WorkerModel {
 	fn init_model(_: &AppModel) -> Self {
-		WorkerModel {}
+		Self
 	}
 
 	async fn update(&mut self, msg: WorkerMsg, _: &(), _: Sender<WorkerMsg>, parent_sender: Sender<AppMsg>) {

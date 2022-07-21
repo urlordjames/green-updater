@@ -21,7 +21,7 @@ impl Model for MCSelectModel {
 
 impl ComponentUpdate<AppModel> for MCSelectModel {
 	fn init_model(_: &AppModel) -> Self {
-		MCSelectModel {
+		Self {
 			visible: false
 		}
 	}
