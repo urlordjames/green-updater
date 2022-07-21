@@ -19,7 +19,8 @@ struct AppModel {
 	url: url::Url,
 	mc_path: PathBuf,
 	buttons_work: bool,
-	spinning: bool
+	show_progress: bool,
+	total: Option<usize>
 }
 
 enum AppMsg {
@@ -27,7 +28,8 @@ enum AppMsg {
 	SetMCPath(PathBuf),
 	Upgrade,
 	FinishedUpgrade,
-	FinishDismissed
+	FinishDismissed,
+	Total(usize)
 }
 
 impl Model for AppModel {
@@ -47,12 +49,10 @@ impl AppUpdate for AppModel {
 			},
 			AppMsg::Upgrade => {
 				self.buttons_work = false;
-				self.spinning = true;
+				self.show_progress = true;
 				send!(components.worker, WorkerMsg::Upgrade((self.url.clone(), self.mc_path.clone())));
 			},
 			AppMsg::FinishedUpgrade => {
-				self.spinning = false;
-
 				match notify_rust::Notification::new()
 					.summary("green updater finished upgrade")
 					.show() {
@@ -66,6 +66,11 @@ impl AppUpdate for AppModel {
 			},
 			AppMsg::FinishDismissed => {
 				self.buttons_work = true;
+				self.show_progress = false;
+				self.total = None;
+			},
+			AppMsg::Total(total) => {
+				self.total = Some(total);
 			}
 		};
 
@@ -109,8 +114,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
 					},
 					set_sensitive: watch! { model.buttons_work }
 				},
-				append = &gtk::Spinner {
-					set_spinning: watch! { model.spinning }
+				append = &gtk::ProgressBar {
+					set_fraction: watch! { match model.total {
+						Some(_) => 1.0,
+						None => 0.0
+					} },
+					set_visible: watch! { model.show_progress }
 				}
 			}
 		}
@@ -143,7 +152,8 @@ fn main() {
 		url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest.json").unwrap(),
 		mc_path: util::minecraft_path(),
 		buttons_work: true,
-		spinning: false
+		show_progress: false,
+		total: None
 	};
 
 	let app = RelmApp::new(model);
