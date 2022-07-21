@@ -37,7 +37,7 @@ impl Model for AppModel {
 }
 
 impl AppUpdate for AppModel {
-	fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
+	fn update(&mut self, msg: AppMsg, components: &AppComponents, sender: Sender<AppMsg>) -> bool {
 		match msg {
 			AppMsg::Open => {
 				send!(components.mc_select, MCSelectMsg::Show);
@@ -52,7 +52,17 @@ impl AppUpdate for AppModel {
 			},
 			AppMsg::FinishedUpgrade => {
 				self.spinning = false;
-				send!(components.finished, FinishedMsg::Finished);
+
+				match notify_rust::Notification::new()
+					.summary("green updater finished upgrade")
+					.show() {
+					Ok(handle) => {
+						handle.on_close(|| send!(sender, AppMsg::FinishDismissed));
+					},
+					Err(_) => {
+						send!(components.finished, FinishedMsg::Finished);
+					}
+				};
 			},
 			AppMsg::FinishDismissed => {
 				self.buttons_work = true;
