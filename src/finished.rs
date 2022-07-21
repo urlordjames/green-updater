@@ -42,6 +42,7 @@ impl ComponentUpdate<AppModel> for FinishedModel {
 impl Widgets<FinishedModel, AppModel> for FinishedWidgets {
 	view! {
 		gtk::MessageDialog {
+			set_title: Some("Green Updater - finished"),
 			set_text: Some("upgrade finished"),
 			set_visible: watch!{ model.visible },
 			set_transient_for: parent!(Some(&parent_widgets.root_widget())),
