@@ -20,7 +20,8 @@ struct AppModel {
 	mc_path: PathBuf,
 	buttons_work: bool,
 	show_progress: bool,
-	total: Option<usize>
+	total: Option<usize>,
+	progress: Option<usize>
 }
 
 enum AppMsg {
@@ -29,7 +30,8 @@ enum AppMsg {
 	Upgrade,
 	FinishedUpgrade,
 	FinishDismissed,
-	Total(usize)
+	Total(usize),
+	Tick
 }
 
 impl Model for AppModel {
@@ -68,9 +70,14 @@ impl AppUpdate for AppModel {
 				self.buttons_work = true;
 				self.show_progress = false;
 				self.total = None;
+				self.progress = None;
 			},
 			AppMsg::Total(total) => {
 				self.total = Some(total);
+				self.progress = Some(0);
+			},
+			AppMsg::Tick => {
+				self.progress = self.progress.map(|progress| progress + 1);
 			}
 		};
 
@@ -115,8 +122,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 					set_sensitive: watch! { model.buttons_work }
 				},
 				append = &gtk::ProgressBar {
-					set_fraction: watch! { match model.total {
-						Some(_) => 1.0,
+					set_fraction: watch! { match model.progress {
+						Some(progress) => progress as f64 / model.total.unwrap() as f64,
 						None => 0.0
 					} },
 					set_visible: watch! { model.show_progress }
@@ -153,7 +160,8 @@ fn main() {
 		mc_path: util::minecraft_path(),
 		buttons_work: true,
 		show_progress: false,
-		total: None
+		total: None,
+		progress: None
 	};
 
 	let app = RelmApp::new(model);
