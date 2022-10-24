@@ -54,7 +54,7 @@ jobs:
 
     - name: "Install Python Dependencies"
       if: steps.cache.outputs.cache-hit != 'true'
-      run: pip install meson ninja
+      run: pip install meson==0.60.3 ninja
 
     - name: "Setup MSVC"
       uses: microsoft/setup-msbuild@v1.1
