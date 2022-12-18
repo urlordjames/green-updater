@@ -57,10 +57,10 @@ jobs:
       run: pip install meson ninja
 
     - name: "Setup MSVC"
-      uses: microsoft/setup-msbuild@v1.1
+      uses: bus1/cabuild/action/msdevshell@v1
       if: steps.cache.outputs.cache-hit != 'true'
       with:
-        msbuild-architecture: x64
+        architecture: x64
 
     - name: "Prepare GTK build"
       working-directory: /gtk
