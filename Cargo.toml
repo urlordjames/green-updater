@@ -14,8 +14,8 @@ version = "0.3"
 git = "https://github.com/urlordjames/green-lib"
 
 [dependencies]
-url = "2.3"
-notify-rust = "4.6"
+url = "2.4"
+notify-rust = "4.8"
 
 [profile.release]
 lto = "fat"
