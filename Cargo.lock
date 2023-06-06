@@ -588,9 +588,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.9"
+version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c85e1d9ab2eadba7e5040d4e09cbd6d072b76a557ad64e797c2cb9d4da21d7e4"
+checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
 dependencies = [
  "cfg-if",
  "libc",
@@ -708,8 +708,8 @@ dependencies = [
 
 [[package]]
 name = "green-lib"
-version = "0.3.0"
-source = "git+https://github.com/urlordjames/green-lib#2f73e718fd768f47ff1efa5a2f0a73eba2bf69c0"
+version = "0.4.0"
+source = "git+https://github.com/urlordjames/green-lib#3ae11e181edc527be435c81c2d00acd1ce89ed6c"
 dependencies = [
  "reqwest",
  "serde",
@@ -725,6 +725,7 @@ dependencies = [
  "green-lib",
  "notify-rust",
  "relm4",
+ "tokio",
  "url",
 ]
 

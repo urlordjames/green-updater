@@ -28,7 +28,11 @@ impl AsyncComponentUpdate<AppModel> for WorkerModel {
 				match remote_directory {
 					Some(remote_directory) => {
 						println!("valid manifest, attempting upgrade...");
-						let (mut rx, handle) = remote_directory.upgrade_game_folder(&download_path).await;
+
+						let (tx, mut rx) = tokio::sync::mpsc::channel(128);
+						let handle = tokio::spawn(async move {
+							remote_directory.upgrade_game_folder(&download_path, Some(tx)).await;
+						});
 
 						loop {
 							match rx.recv().await {
