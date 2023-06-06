@@ -48,14 +48,10 @@ impl Widgets<MCSelectModel, AppModel> for MCSelectWidgets {
 			set_transient_for: parent!(Some(&parent_widgets.root_widget())),
 			set_visible: watch! { model.visible },
 			connect_response(sender) => move |file_chooser, response_type| {
-				match response_type {
-					gtk::ResponseType::Accept => match file_chooser.file() {
-						Some(file) => {
-							send!(sender, MCSelectMsg::Success(file.path().unwrap()));
-						},
-						_ => ()
-					},
-					_ => ()
+				if response_type == gtk::ResponseType::Accept {
+					if let Some(file) = file_chooser.file() {
+						send!(sender, MCSelectMsg::Success(file.path().unwrap()));
+					}
 				}
 			}
 		}

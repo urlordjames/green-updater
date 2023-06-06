@@ -29,6 +29,7 @@
 					nativeBuildInputs = with pkgs; [
 						pkg-config
 						cargo
+						clippy
 					];
 
 					buildInputs = with pkgs; [ gtk4 ];

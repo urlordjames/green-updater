@@ -34,17 +34,14 @@ impl AsyncComponentUpdate<AppModel> for WorkerModel {
 							remote_directory.upgrade_game_folder(&download_path, Some(tx)).await;
 						});
 
-						loop {
-							match rx.recv().await {
-								Some(msg) => match msg {
-									green_lib::UpgradeStatus::Tick => {
-										send!(parent_sender, AppMsg::Tick)
-									},
-									green_lib::UpgradeStatus::Length(size) => {
-										send!(parent_sender, AppMsg::Total(size));
-									}
+						while let Some(msg) = rx.recv().await {
+							match msg {
+								green_lib::UpgradeStatus::Tick => {
+									send!(parent_sender, AppMsg::Tick)
 								},
-								None => break
+								green_lib::UpgradeStatus::Length(size) => {
+									send!(parent_sender, AppMsg::Total(size));
+								}
 							}
 						}
 
