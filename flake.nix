@@ -41,7 +41,7 @@
 
 					buildInputs = commonBuildInputs;
 
-					shellHook = vulkanPath;
+					shellHook = "export ${vulkanPath}";
 				};
 
 				packages.default = green-updater;
