@@ -1,107 +1,12 @@
-# adapted from https://github.com/gtk-rs/gtk4-rs/blob/master/.github/workflows/windows-msvc.yml
-
 name: "build"
 
 on: ["push", "pull_request"]
 
 jobs:
-  build-windows:
-    runs-on: "windows-latest"
-    env:
-      PKG_CONFIG_PATH: "C:\\gnome\\lib\\pkgconfig"
+  build-nix:
+    runs-on: "ubuntu-latest"
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: "login to AWS"
-      uses: "aws-actions/configure-aws-credentials@v1"
-      with:
-        aws-region: us-east-2
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    - uses: actions/cache@v1
-      id: cache
-      with:
-        path: c:/gnome
-        key: ${{ runner.os }}-gtk4
-        restore-keys: |
-          ${{ runner.os }}-gtk4
-
-    - name: "Set up the PATH environment"
-      run: |
-        echo "C:\pkg-config-lite-0.28-1\bin" >> $GITHUB_PATH
-        echo "C:\gnome\bin" >> $GITHUB_PATH
-      shell: bash
-
-    - name: "Install pkgconfig-lite"
-      run: |
-        Invoke-WebRequest -Uri https://deac-fra.dl.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip -OutFile /pkg_config_lite.zip -MaximumRetryCount 5
-        Expand-Archive /pkg_config_lite.zip -DestinationPath C:\
-        pkg-config --version
-
-    - name: "Clone GTK"
-      working-directory: /
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        git clone "https://gitlab.gnome.org/GNOME/gtk.git" --depth 1
-
-    - name: "Setup Python"
-      uses: actions/setup-python@v2
-      if: steps.cache.outputs.cache-hit != 'true'
-      with:
-        python-version: "3.x"
-
-    - name: "Install Python Dependencies"
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: pip install meson ninja
-
-    - name: "Setup MSVC"
-      uses: bus1/cabuild/action/msdevshell@v1
-      if: steps.cache.outputs.cache-hit != 'true'
-      with:
-        architecture: x64
-
-    - name: "Prepare GTK build"
-      working-directory: /gtk
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        meson setup builddir --prefix=C:/gnome -Dbackend_max_links=1 -Ddemos=false -Dbuild-tests=false -Dmedia-gstreamer=disabled -Dbuild-examples=false -Dglib:tests=false -Dharfbuzz:tests=disabled -Dharfbuzz:docs=disabled -Dgraphene:tests=false -Dgdk-pixbuf:tests=false -Dcairo:tests=disabled
-
-    - name: "Build and install GTK"
-      working-directory: /gtk
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        meson install -C builddir
-
-    - name: "build"
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
-
-    - name: "prepare distribution folder"
-      run: |
-        mkdir dist/share/glib-2.0 -p
-        cp target/release/green-updater.exe dist
-        cp C:/gnome/bin/*.dll dist -r
-        cp C:/gnome/share/glib-2.0/schemas dist/share/glib-2.0/schemas -r
-      shell: bash
-
-    - name: "make installer"
-      run: makensis install.nsi
-
-    - uses: "actions/upload-artifact@v3"
-      with:
-        name: "windows"
-        path: "dist/*"
-        if-no-files-found: error
-
-    - uses: "actions/upload-artifact@v3"
-      with:
-        name: "windows installer"
-        path: "green-installer.exe"
-        if-no-files-found: error
-
-    - name: "upload installer to S3"
-      run: aws s3 cp green-installer.exe s3://green-updater/green-installer.exe
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v20
+		- run: nix build
