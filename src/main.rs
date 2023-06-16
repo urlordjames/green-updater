@@ -78,6 +78,14 @@ impl Application for App {
 				self.mc_path = Arc::new(path);
 				Command::none()
 			},
+			Message::Upgrade => {
+				self.upgrade_state = UpgradeState::FetchingDirectory;
+				let url = self.url.clone();
+
+				Command::perform(async move {
+					green_lib::Directory::from_url(url).await.unwrap()
+				}, Message::DirectoryFetched)
+			},
 			Message::DirectoryFetched(directory) => {
 				let worker = self.worker.as_ref().unwrap().clone();
 				let directory = Arc::new(directory);
@@ -97,14 +105,6 @@ impl Application for App {
 				});
 
 				Command::none()
-			},
-			Message::Upgrade => {
-				self.upgrade_state = UpgradeState::FetchingDirectory;
-				let url = self.url.clone();
-
-				Command::perform(async move {
-					green_lib::Directory::from_url(url).await.unwrap()
-				}, Message::DirectoryFetched)
 			},
 			Message::SetLength(length) => {
 				match &mut self.upgrade_state {
