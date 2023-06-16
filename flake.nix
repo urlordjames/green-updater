@@ -44,7 +44,18 @@
 					shellHook = "export ${vulkanPath}";
 				};
 
-				packages.default = green-updater;
+				packages.default = pkgs.stdenvNoCC.mkDerivation {
+					name = "green-updater-wrapped";
+					src = green-updater;
+
+					installPhase = ''
+						mkdir -p $out
+						mv bin $out/bin
+						echo "#!/bin/sh" > $out/bin/green-updater-wrapped
+						echo "${vulkanPath} $out/bin/green-updater" >> $out/bin/green-updater-wrapped
+						chmod +x $out/bin/green-updater-wrapped
+					'';
+				};
 			}
 		);
 }
