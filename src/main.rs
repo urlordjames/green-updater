@@ -1,16 +1,26 @@
 #![windows_subsystem = "windows"]
 
-use iced::widget::{button, column, container, text};
+use iced::widget::{button, Column, container, text, progress_bar};
 use iced::{Alignment, Application, Command, Length, Element, Settings, Theme};
 
 use std::path::PathBuf;
 
 use green_lib::util;
 
+struct UpgradingStatus {
+	total: f32,
+	value: f32
+}
+
+enum UpgradeStatus {
+	Upgrading(UpgradingStatus),
+	Idle
+}
+
 struct App {
 	url: url::Url,
 	mc_path: PathBuf,
-	can_upgrade: bool
+	upgrade_status: UpgradeStatus
 }
 
 #[derive(Debug, Clone)]
@@ -30,7 +40,7 @@ impl Application for App {
 		(Self {
 			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest.json").unwrap(),
 			mc_path: util::minecraft_path(),
-			can_upgrade: true
+			upgrade_status: UpgradeStatus::Idle
 		}, Command::none())
 	}
 
@@ -45,7 +55,10 @@ impl Application for App {
 				Command::none()
 			},
 			Message::Upgrade => {
-				self.can_upgrade = false;
+				self.upgrade_status = UpgradeStatus::Upgrading(UpgradingStatus {
+					total: 0.0,
+					value: 0.0
+				});
 
 				let url = self.url.clone();
 				let mc_path = self.mc_path.clone();
@@ -56,7 +69,7 @@ impl Application for App {
 				}, |_| Message::UpgradeFinished)
 			},
 			Message::UpgradeFinished => {
-				self.can_upgrade = true;
+				self.upgrade_status = UpgradeStatus::Idle;
 				Command::none()
 			}
 		}
@@ -65,17 +78,23 @@ impl Application for App {
 	fn view(&self) -> Element<Message> {
 		let mut upgrade_button = button("upgrade");
 
-		if self.can_upgrade {
+		if matches!(self.upgrade_status, UpgradeStatus::Idle) {
 			upgrade_button = upgrade_button.on_press(Message::Upgrade);
 		}
 
-		let content = column![
-			text("green updater").size(50),
-			text("(licensed under GPL-3.0 or later)"),
-			text(format!("{:?}", self.mc_path)),
-			upgrade_button,
-			button("set to test path").on_press(Message::SetMCPath(PathBuf::from("/tmp/test")))
-		].align_items(Alignment::Center);
+		let mut content = vec![
+			text("green updater").size(50).into(),
+			text("(licensed under GPL-3.0 or later)").into(),
+			text(format!("{:?}", self.mc_path)).into(),
+			upgrade_button.into(),
+			button("set to test path").on_press(Message::SetMCPath(PathBuf::from("/tmp/test"))).into()
+		];
+
+		if let UpgradeStatus::Upgrading(status) = &self.upgrade_status {
+			content.push(progress_bar(0.0..=status.total, status.value).into());
+		}
+
+		let content = Column::with_children(content).align_items(Alignment::Center);
 
 		container(content)
 			.width(Length::Fill)
