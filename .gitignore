@@ -8,3 +8,6 @@
 # windows installer
 /green-installer.exe
 /dist
+
+# nix build
+/result
