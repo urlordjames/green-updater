@@ -5,12 +5,15 @@ edition = "2021"
 authors = ["urlordjames <32751441+urlordjames@users.noreply.github.com>"]
 license = "GPL-3.0+"
 
+[dependencies.iced]
+version = "0.9"
+features = [ "tokio" ]
+
 [dependencies.green-lib]
 version = "0.4"
 git = "https://github.com/urlordjames/green-lib"
 
 [dependencies]
-iced = "0.9"
 url = "2.4"
 notify-rust = "4.8"
 tokio = "1.28"
