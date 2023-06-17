@@ -178,6 +178,9 @@ impl Application for App {
 
 				handle.await.unwrap();
 				output.send(Message::UpgradeFinished).await.unwrap();
+				let _ = notify_rust::Notification::new()
+					.summary("green updater finished upgrade")
+					.show();
 			}
 
 			unreachable!()
