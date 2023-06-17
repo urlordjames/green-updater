@@ -40,6 +40,7 @@ struct App {
 #[derive(Debug, Clone)]
 enum Message {
 	WorkerReady(Arc<mpsc::Sender<UpgradeInfo>>),
+	SelectMCPath,
 	SetMCPath(PathBuf),
 	Upgrade,
 	DirectoryFetched(green_lib::Directory),
@@ -73,6 +74,12 @@ impl Application for App {
 			Message::WorkerReady(worker) => {
 				self.worker = Some(worker);
 				Command::none()
+			},
+			Message::SelectMCPath => {
+				Command::perform(async move {
+					let dialog = rfd::AsyncFileDialog::new();
+					dialog.pick_folder().await.map(PathBuf::from).unwrap_or_else(util::minecraft_path)
+				}, Message::SetMCPath)
 			},
 			Message::SetMCPath(path) => {
 				self.mc_path = Arc::new(path);
@@ -140,8 +147,8 @@ impl Application for App {
 			text("green updater").size(50).into(),
 			text("(licensed under GPL-3.0 or later)").into(),
 			text(format!("{:?}", self.mc_path)).into(),
-			upgrade_button.into(),
-			button("set to test path").on_press(Message::SetMCPath(PathBuf::from("/tmp/test"))).into()
+			button("select Minecraft folder").on_press(Message::SelectMCPath).into(),
+			upgrade_button.into()
 		];
 
 		if let UpgradeState::Upgrading(status) = &self.upgrade_state {

@@ -21,6 +21,7 @@
 				xorg.libXrandr
 				xorg.libXi
 				fontconfig
+				gtk3
 			];
 			commonNativeInputs = with pkgs; [
 				pkg-config
