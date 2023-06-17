@@ -15,31 +15,54 @@
 				inherit system;
 			};
 			craneLib = crane.lib.${system};
+			commonBuildInputs = with pkgs; [
+				xorg.libX11
+				xorg.libXcursor
+				xorg.libXrandr
+				xorg.libXi
+				fontconfig
+				gtk3
+			];
+			commonNativeInputs = with pkgs; [
+				pkg-config
+				cmake
+			];
+			vulkanPath = ''LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [ pkgs.vulkan-loader ]}"'';
+			xdgPath = "XDG_DATA_DIRS=$XDG_DATA_DIRS:$GSETTINGS_SCHEMAS_PATH";
 			green-updater = craneLib.buildPackage {
 				src = craneLib.cleanCargoSource (craneLib.path ./.);
 
-				nativeBuildInputs = with pkgs; [
-					pkg-config
-					wrapGAppsHook
-				];
-
-				buildInputs = with pkgs; [ gtk4 ];
+				buildInputs = commonBuildInputs;
+				nativeBuildInputs = commonNativeInputs;
 			}; in {
 				devShell = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
-						pkg-config
 						cargo
 						clippy
-					];
+					] ++ commonNativeInputs;
 
-					buildInputs = with pkgs; [ gtk4 ];
+					buildInputs = commonBuildInputs;
 
 					shellHook = ''
-						XDG_DATA_DIRS=$XDG_DATA_DIRS:$GSETTINGS_SCHEMAS_PATH
+						export ${vulkanPath}
+						export ${xdgPath}
 					'';
 				};
 
-				packages.default = green-updater;
+				packages.default = pkgs.stdenvNoCC.mkDerivation {
+					name = "green-updater-wrapped";
+					src = green-updater;
+
+					nativeBuildInputs = [ pkgs.wrapGAppsHook ];
+
+					installPhase = ''
+						mkdir -p $out
+						mv bin $out/bin
+						echo "#!/bin/sh" > $out/bin/green-updater-wrapped
+						echo "${vulkanPath} $out/bin/green-updater" >> $out/bin/green-updater-wrapped
+						chmod +x $out/bin/green-updater-wrapped
+					'';
+				};
 			}
 		);
 }
