@@ -33,7 +33,9 @@
 				src = craneLib.cleanCargoSource (craneLib.path ./.);
 
 				buildInputs = commonBuildInputs;
-				nativeBuildInputs = commonNativeInputs;
+				nativeBuildInputs = with pkgs; [
+					wrapGAppsHook
+				] ++ commonNativeInputs;
 			}; in {
 				devShell = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
@@ -53,13 +55,12 @@
 					name = "green-updater-wrapped";
 					src = green-updater;
 
-					nativeBuildInputs = [ pkgs.wrapGAppsHook ];
-
 					installPhase = ''
+						mv bin/green-updater bin/.green-updater
 						mkdir -p $out
 						mv bin $out/bin
 						echo "#!/bin/sh" > $out/bin/green-updater-wrapped
-						echo "${vulkanPath} $out/bin/green-updater" >> $out/bin/green-updater-wrapped
+						echo "${vulkanPath} $out/bin/.green-updater" >> $out/bin/green-updater-wrapped
 						chmod +x $out/bin/green-updater-wrapped
 					'';
 				};
