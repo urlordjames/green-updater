@@ -28,6 +28,7 @@
 				cmake
 			];
 			vulkanPath = ''LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [ pkgs.vulkan-loader ]}"'';
+			xdgPath = "XDG_DATA_DIRS=$XDG_DATA_DIRS:$GSETTINGS_SCHEMAS_PATH";
 			green-updater = craneLib.buildPackage {
 				src = craneLib.cleanCargoSource (craneLib.path ./.);
 
@@ -42,12 +43,17 @@
 
 					buildInputs = commonBuildInputs;
 
-					shellHook = "export ${vulkanPath}";
+					shellHook = ''
+						export ${vulkanPath}
+						export ${xdgPath}
+					'';
 				};
 
 				packages.default = pkgs.stdenvNoCC.mkDerivation {
 					name = "green-updater-wrapped";
 					src = green-updater;
+
+					nativeBuildInputs = [ pkgs.wrapGAppsHook ];
 
 					installPhase = ''
 						mkdir -p $out
