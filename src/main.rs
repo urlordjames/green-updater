@@ -58,7 +58,7 @@ impl Application for App {
 
 	fn new(_flags: ()) -> (Self, Command<Message>) {
 		(Self {
-			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest.json").unwrap(),
+			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest2.json").unwrap(),
 			mc_path: Arc::new(util::minecraft_path()),
 			upgrade_state: UpgradeState::Idle,
 			worker: None
