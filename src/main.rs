@@ -200,6 +200,10 @@ impl Application for App {
 			unreachable!()
 		})
 	}
+
+	fn theme(&self) -> Theme {
+		Theme::Dark
+	}
 }
 
 fn main() {
