@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use iced::widget::{button, Column, container, text, progress_bar};
+use iced::widget::{button, Column, container, text, progress_bar, mouse_area};
 use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
 use iced::futures::SinkExt;
 use iced::subscription::channel;
@@ -40,6 +40,7 @@ struct App {
 #[derive(Debug, Clone)]
 enum Message {
 	WorkerReady(Arc<mpsc::Sender<UpgradeInfo>>),
+	OpenProjectLink,
 	SelectMCPath,
 	SetMCPath(PathBuf),
 	Upgrade,
@@ -73,6 +74,10 @@ impl Application for App {
 		match message {
 			Message::WorkerReady(worker) => {
 				self.worker = Some(worker);
+				Command::none()
+			},
+			Message::OpenProjectLink => {
+				open::that("https://github.com/urlordjames/green-updater").unwrap();
 				Command::none()
 			},
 			Message::SelectMCPath => {
@@ -144,7 +149,9 @@ impl Application for App {
 		}
 
 		let mut content = vec![
-			text("green updater").size(50).into(),
+			mouse_area(
+				text("green updater").size(50)
+			).on_press(Message::OpenProjectLink).into(),
 			text("(licensed under GPL-3.0 or later)").into(),
 			text(format!("{:?}", self.mc_path)).into(),
 			button("select Minecraft folder").on_press(Message::SelectMCPath).into(),
