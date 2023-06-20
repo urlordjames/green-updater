@@ -34,7 +34,8 @@ struct App {
 	url: url::Url,
 	mc_path: Arc<PathBuf>,
 	upgrade_state: UpgradeState,
-	worker: Option<Arc<mpsc::Sender<UpgradeInfo>>>
+	worker: Option<Arc<mpsc::Sender<UpgradeInfo>>>,
+	can_select_path: bool
 }
 
 #[derive(Debug, Clone)]
@@ -42,7 +43,7 @@ enum Message {
 	WorkerReady(Arc<mpsc::Sender<UpgradeInfo>>),
 	OpenProjectLink,
 	SelectMCPath,
-	SetMCPath(PathBuf),
+	SetMCPath(Option<PathBuf>),
 	Upgrade,
 	DirectoryFetched(green_lib::Directory),
 	UpgradeInProgress,
@@ -62,7 +63,8 @@ impl Application for App {
 			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest2.json").unwrap(),
 			mc_path: Arc::new(util::minecraft_path()),
 			upgrade_state: UpgradeState::Idle,
-			worker: None
+			worker: None,
+			can_select_path: true
 		}, Command::none())
 	}
 
@@ -81,13 +83,17 @@ impl Application for App {
 				Command::none()
 			},
 			Message::SelectMCPath => {
+				self.can_select_path = false;
 				Command::perform(async move {
 					let dialog = rfd::AsyncFileDialog::new();
-					dialog.pick_folder().await.map(PathBuf::from).unwrap_or_else(util::minecraft_path)
+					dialog.pick_folder().await.map(PathBuf::from)
 				}, Message::SetMCPath)
 			},
 			Message::SetMCPath(path) => {
-				self.mc_path = Arc::new(path);
+				if let Some(path) = path {
+					self.mc_path = Arc::new(path);
+				}
+				self.can_select_path = true;
 				Command::none()
 			},
 			Message::Upgrade => {
@@ -142,10 +148,16 @@ impl Application for App {
 	}
 
 	fn view(&self) -> Element<Message> {
-		let mut upgrade_button = button("upgrade");
+		let idle = self.can_select_path && matches!(self.upgrade_state, UpgradeState::Idle);
 
-		if matches!(self.upgrade_state, UpgradeState::Idle) {
+		let mut upgrade_button = button("upgrade");
+		if idle {
 			upgrade_button = upgrade_button.on_press(Message::Upgrade);
+		}
+
+		let mut select_button = button("select Minecraft folder");
+		if idle {
+			select_button = select_button.on_press(Message::SelectMCPath);
 		}
 
 		let mut content = vec![
@@ -154,7 +166,7 @@ impl Application for App {
 			).on_press(Message::OpenProjectLink).into(),
 			text("(licensed under GPL-3.0 or later)").into(),
 			text(format!("{:?}", self.mc_path)).into(),
-			button("select Minecraft folder").on_press(Message::SelectMCPath).into(),
+			select_button.into(),
 			upgrade_button.into()
 		];
 
