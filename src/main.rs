@@ -165,7 +165,7 @@ impl Application for App {
 				text("green updater").size(50)
 			).on_press(Message::OpenProjectLink).into(),
 			text("(licensed under GPL-3.0 or later)").into(),
-			text(format!("{:?}", self.mc_path)).into(),
+			text(self.mc_path.display()).into(),
 			select_button.into(),
 			upgrade_button.into()
 		];
