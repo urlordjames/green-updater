@@ -16,9 +16,9 @@ git = "https://github.com/urlordjames/green-lib"
 [dependencies]
 url = "2.4"
 notify-rust = "4.8"
-tokio = "1.28"
+tokio = "1.29"
 rfd = "0.11"
-open = "4.1"
+open = "5.0"
 
 [profile.release]
 lto = "fat"

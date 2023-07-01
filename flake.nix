@@ -41,6 +41,7 @@
 					nativeBuildInputs = with pkgs; [
 						cargo
 						clippy
+						cargo-outdated
 					] ++ commonNativeInputs;
 
 					buildInputs = commonBuildInputs;
