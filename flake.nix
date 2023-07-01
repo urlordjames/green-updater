@@ -29,7 +29,7 @@
 			];
 			vulkanPath = ''LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [ pkgs.vulkan-loader ]}"'';
 			xdgPath = "XDG_DATA_DIRS=$XDG_DATA_DIRS:$GSETTINGS_SCHEMAS_PATH";
-			green-updater = craneLib.buildPackage {
+			green-updater-wrapped = craneLib.buildPackage {
 				src = craneLib.cleanCargoSource (craneLib.path ./.);
 
 				buildInputs = commonBuildInputs;
@@ -53,16 +53,16 @@
 				};
 
 				packages.default = pkgs.stdenvNoCC.mkDerivation {
-					name = "green-updater-wrapped";
-					src = green-updater;
+					name = "green-updater";
+					src = green-updater-wrapped;
 
 					installPhase = ''
-						mv bin/green-updater bin/.green-updater
+						mv bin/green-updater bin/.green-updater-wrapped
 						mkdir -p $out
 						mv bin $out/bin
-						echo "#!/bin/sh" > $out/bin/green-updater-wrapped
-						echo "${vulkanPath} $out/bin/.green-updater" >> $out/bin/green-updater-wrapped
-						chmod +x $out/bin/green-updater-wrapped
+						echo "#!/bin/sh" > $out/bin/green-updater
+						echo "${vulkanPath} $out/bin/.green-updater-wrapped" >> $out/bin/green-updater
+						chmod +x $out/bin/green-updater
 					'';
 				};
 			}
