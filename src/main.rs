@@ -219,5 +219,6 @@ impl Application for App {
 }
 
 fn main() {
+	pretty_env_logger::init();
 	App::run(Settings::default()).unwrap();
 }

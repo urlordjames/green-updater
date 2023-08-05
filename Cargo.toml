@@ -19,6 +19,7 @@ notify-rust = "4.8"
 tokio = "1.29"
 rfd = "0.11"
 open = "5.0"
+pretty_env_logger = "0.5"
 
 [profile.release]
 lto = "fat"
