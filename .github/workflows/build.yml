@@ -25,11 +25,9 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+    - uses: dtolnay/rust-toolchain@stable
     - name: "build"
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
+      run: cargo build --release
 
     - name: "make installer"
       run: makensis install.nsi
@@ -49,11 +47,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - uses: dtolnay/rust-toolchain@stable
     - name: "build"
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
+      run: cargo build --release
 
     - uses: "actions/upload-artifact@v3"
       with:
