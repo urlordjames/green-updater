@@ -6,7 +6,7 @@ authors = ["urlordjames <32751441+urlordjames@users.noreply.github.com>"]
 license = "GPL-3.0+"
 
 [dependencies.iced]
-version = "0.9"
+version = "0.10"
 features = [ "tokio" ]
 
 [dependencies.green-lib]
