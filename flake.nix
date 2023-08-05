@@ -2,6 +2,7 @@
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/release-23.05";
 		flake-utils.url = "github:numtide/flake-utils";
+		mozilla.url = "github:mozilla/nixpkgs-mozilla";
 
 		crane = {
 			url = "github:ipetkov/crane";
@@ -9,12 +10,17 @@
 		};
 	};
 
-	outputs = { self, nixpkgs, flake-utils, crane }:
+	outputs = { self, nixpkgs, flake-utils, mozilla, crane }:
 		flake-utils.lib.eachDefaultSystem (system:
 			let pkgs = import nixpkgs {
 				inherit system;
+				overlays = [ mozilla.overlay ];
 			};
-			craneLib = crane.lib.${system};
+			rust = (pkgs.rustChannelOf {
+				channel = "1.71.1";
+				sha256 = "sha256-R0F0Risbr74xg9mEYydyebx/z0Wu6HI0/KWwrV30vZo=";
+			}).rust;
+			craneLib = crane.lib.${system}.overrideToolchain rust;
 			commonBuildInputs = with pkgs; [
 				xorg.libX11
 				xorg.libXcursor
@@ -39,8 +45,7 @@
 			}; in {
 				devShell = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
-						cargo
-						clippy
+						rust
 						cargo-outdated
 					] ++ commonNativeInputs;
 
