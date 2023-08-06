@@ -79,7 +79,7 @@ impl Application for App {
 				Command::none()
 			},
 			Message::OpenProjectLink => {
-				open::that("https://github.com/urlordjames/green-updater").unwrap();
+				open::that_detached("https://github.com/urlordjames/green-updater").unwrap();
 				Command::none()
 			},
 			Message::SelectMCPath => {
