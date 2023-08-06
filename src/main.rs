@@ -34,13 +34,13 @@ struct App {
 	url: url::Url,
 	mc_path: Arc<PathBuf>,
 	upgrade_state: UpgradeState,
-	worker: Option<Arc<mpsc::Sender<UpgradeInfo>>>,
+	worker: Option<mpsc::Sender<UpgradeInfo>>,
 	can_select_path: bool
 }
 
 #[derive(Debug, Clone)]
 enum Message {
-	WorkerReady(Arc<mpsc::Sender<UpgradeInfo>>),
+	WorkerReady(mpsc::Sender<UpgradeInfo>),
 	OpenProjectLink,
 	SelectMCPath,
 	SetMCPath(Option<PathBuf>),
@@ -187,7 +187,7 @@ impl Application for App {
 	fn subscription(&self) -> Subscription<Message> {
 		channel(0, 128, |mut output| async move {
 			let (tx, mut rx) = mpsc::channel(128);
-			output.send(Message::WorkerReady(Arc::new(tx))).await.unwrap();
+			output.send(Message::WorkerReady(tx)).await.unwrap();
 
 			while let Some(update) = rx.recv().await {
 				let (tx, mut rx) = mpsc::channel(128);
