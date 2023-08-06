@@ -13,6 +13,11 @@ features = [ "tokio" ]
 version = "0.6"
 git = "https://github.com/urlordjames/green-lib"
 
+# fix fonts on NixOS
+[dependencies.fontdb]
+version = "0.14"
+features = [ "fontconfig" ]
+
 [dependencies]
 url = "2.4"
 notify-rust = "4.8"
