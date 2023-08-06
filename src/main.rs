@@ -20,7 +20,7 @@ struct UpgradingStatus {
 
 #[derive(Debug)]
 struct UpgradeInfo {
-	directory: Arc<green_lib::Directory>,
+	directory: green_lib::Directory,
 	mc_path: Arc<PathBuf>
 }
 
@@ -106,7 +106,6 @@ impl Application for App {
 			},
 			Message::DirectoryFetched(directory) => {
 				let worker = self.worker.as_ref().unwrap().clone();
-				let directory = Arc::new(directory);
 				let mc_path = self.mc_path.clone();
 
 				Command::perform(async move {
