@@ -69,7 +69,11 @@ impl Application for App {
 	}
 
 	fn title(&self) -> String {
-		String::from("green updater")
+		match &self.upgrade_state {
+			UpgradeState::FetchingDirectory => String::from("green updater: fetching..."),
+			UpgradeState::Upgrading(status) => format!("green updater: {:.1}% downloaded", (status.value / status.total) * 100.0),
+			UpgradeState::Idle => String::from("green updater")
+		}
 	}
 
 	fn update(&mut self, message: Message) -> Command<Message> {
