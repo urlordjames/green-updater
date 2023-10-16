@@ -22,7 +22,7 @@ features = [ "fontconfig" ]
 url = "2.4"
 notify-rust = "4.8"
 tokio = "1.29"
-rfd = "0.11"
+rfd = "0.12"
 open = "5.0"
 pretty_env_logger = "0.5"
 
