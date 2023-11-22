@@ -14,6 +14,7 @@ version = "0.6"
 git = "https://github.com/urlordjames/green-lib"
 
 # fix fonts on NixOS
+# TODO: remove on next iced release
 [dependencies.fontdb]
 version = "0.14"
 features = [ "fontconfig" ]
