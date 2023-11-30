@@ -40,6 +40,7 @@
 				devShell = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
 						cargo
+						clippy
 						cargo-outdated
 					] ++ commonNativeInputs;
 
