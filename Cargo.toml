@@ -19,11 +19,15 @@ git = "https://github.com/urlordjames/green-lib"
 version = "0.14"
 features = [ "fontconfig" ]
 
+[dependencies.rfd]
+version = "0.12"
+default-features = false
+features = [ "xdg-portal" ]
+
 [dependencies]
 url = "2.5"
 notify-rust = "4.10"
 tokio = "1.35"
-rfd = "0.12"
 open = "5.0"
 pretty_env_logger = "0.5"
 

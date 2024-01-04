@@ -21,21 +21,17 @@
 				xorg.libXrandr
 				xorg.libXi
 				fontconfig
-				gtk3
 			];
 			commonNativeInputs = with pkgs; [
 				pkg-config
 				cmake
 			];
 			vulkanPath = ''LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [ pkgs.vulkan-loader ]}"'';
-			xdgPath = "XDG_DATA_DIRS=$XDG_DATA_DIRS:$GSETTINGS_SCHEMAS_PATH";
 			green-updater-wrapped = craneLib.buildPackage {
 				src = craneLib.cleanCargoSource (craneLib.path ./.);
 
 				buildInputs = commonBuildInputs;
-				nativeBuildInputs = with pkgs; [
-					wrapGAppsHook
-				] ++ commonNativeInputs;
+				nativeBuildInputs = commonNativeInputs;
 			}; in {
 				devShell = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
@@ -46,10 +42,7 @@
 
 					buildInputs = commonBuildInputs;
 
-					shellHook = ''
-						export ${vulkanPath}
-						export ${xdgPath}
-					'';
+					shellHook = "export ${vulkanPath}";
 				};
 
 				packages.default = pkgs.stdenvNoCC.mkDerivation {
