@@ -1,6 +1,6 @@
 {
 	inputs = {
-		nixpkgs.url = "github:nixos/nixpkgs/release-23.11";
+		nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # switch to release-24.05 when that comes out
 		flake-utils.url = "github:numtide/flake-utils";
 
 		crane = {
@@ -26,7 +26,7 @@
 				pkg-config
 				cmake
 			];
-			vulkanPath = ''LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [ pkgs.vulkan-loader ]}"'';
+			ld_hack = ''LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath [ pkgs.vulkan-loader pkgs.libxkbcommon ]}"'';
 			green-updater-wrapped = craneLib.buildPackage {
 				src = craneLib.cleanCargoSource (craneLib.path ./.);
 
@@ -42,7 +42,7 @@
 
 					buildInputs = commonBuildInputs;
 
-					shellHook = "export ${vulkanPath}";
+					shellHook = "export ${ld_hack}";
 				};
 
 				packages.default = pkgs.stdenvNoCC.mkDerivation {
@@ -54,7 +54,7 @@
 						mkdir -p $out
 						mv bin $out/bin
 						echo "#!/bin/sh" > $out/bin/green-updater
-						echo "${vulkanPath} $out/bin/.green-updater-wrapped" >> $out/bin/green-updater
+						echo "${ld_hack} $out/bin/.green-updater-wrapped" >> $out/bin/green-updater
 						chmod +x $out/bin/green-updater
 					'';
 				};

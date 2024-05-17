@@ -6,29 +6,23 @@ authors = ["urlordjames <32751441+urlordjames@users.noreply.github.com>"]
 license = "GPL-3.0+"
 
 [dependencies.iced]
-version = "0.10"
+version = "0.12"
 features = [ "tokio" ]
 
 [dependencies.green-lib]
 version = "0.6"
 git = "https://github.com/urlordjames/green-lib"
 
-# fix fonts on NixOS
-# TODO: remove on next iced release
-[dependencies.fontdb]
-version = "0.14"
-features = [ "fontconfig" ]
-
 [dependencies.rfd]
-version = "0.12"
+version = "0.14"
 default-features = false
-features = [ "xdg-portal" ]
+features = [ "xdg-portal", "tokio" ]
 
 [dependencies]
 url = "2.5"
-notify-rust = "4.10"
-tokio = "1.35"
-open = "5.0"
+notify-rust = "4.11"
+tokio = "1.37"
+open = "5.1"
 pretty_env_logger = "0.5"
 
 [profile.release]
