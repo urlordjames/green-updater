@@ -13,6 +13,9 @@ use std::sync::Arc;
 use green_lib::UpgradeStatus;
 use green_lib::util;
 
+mod notify;
+use notify::notify_upgrade_done;
+
 struct UpgradingStatus {
 	total: f32,
 	value: f32
@@ -207,9 +210,7 @@ impl Application for App {
 
 				handle.await.unwrap();
 				output.send(Message::UpgradeFinished).await.unwrap();
-				let _ = notify_rust::Notification::new()
-					.summary("green updater finished upgrade")
-					.show_async().await;
+				notify_upgrade_done().await;
 			}
 
 			unreachable!()
