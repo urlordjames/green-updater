@@ -7,16 +7,16 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v20
-    - uses: DeterminateSystems/magic-nix-cache-action@v2
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v27
+    - uses: DeterminateSystems/magic-nix-cache-action@v6
     - run: nix build
 
   build-windows:
     runs-on: "windows-latest"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: "login to AWS"
       uses: "aws-actions/configure-aws-credentials@v4"
@@ -32,7 +32,7 @@ jobs:
     - name: "make installer"
       run: makensis install.nsi
 
-    - uses: "actions/upload-artifact@v3"
+    - uses: "actions/upload-artifact@v4"
       with:
         name: "windows installer"
         path: "green-installer.exe"
@@ -40,19 +40,3 @@ jobs:
 
     - name: "upload installer to S3"
       run: aws s3 cp green-installer.exe s3://green-updater/green-installer.exe
-
-  build-macos:
-    runs-on: "macos-latest"
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - uses: dtolnay/rust-toolchain@stable
-    - name: "build"
-      run: cargo build --release
-
-    - uses: "actions/upload-artifact@v3"
-      with:
-        name: "macOS executable"
-        path: "target/release/green-updater"
-        if-no-files-found: error
