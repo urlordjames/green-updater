@@ -27,5 +27,10 @@ pretty_env_logger = "0.5"
 [target.'cfg(target_os = "windows")'.dependencies]
 tauri-winrt-notification = "0.3.0"
 
+[target.'cfg(target_os = "linux")'.dependencies.ashpd]
+version = "0.8"
+features = [ "tokio" ]
+default-features = false
+
 [profile.release]
 lto = "fat"
