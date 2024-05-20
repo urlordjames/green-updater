@@ -16,3 +16,8 @@ pub async fn notify_upgrade_done() {
 			.show().unwrap();
 	}).await.unwrap();
 }
+
+#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+pub async fn notify_upgrade_done() {
+	// not implemented
+}
