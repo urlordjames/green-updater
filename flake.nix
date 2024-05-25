@@ -14,7 +14,7 @@
 			let pkgs = import nixpkgs {
 				inherit system;
 			};
-			craneLib = crane.lib.${system};
+			craneLib = (crane.mkLib pkgs);
 			commonBuildInputs = with pkgs; [
 				xorg.libX11
 				xorg.libXcursor
