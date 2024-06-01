@@ -1,6 +1,6 @@
 {
 	inputs = {
-		nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable"; # switch to release-24.05 when that comes out
+		nixpkgs.url = "github:nixos/nixpkgs/release-24.05";
 		flake-utils.url = "github:numtide/flake-utils";
 
 		crane = {
