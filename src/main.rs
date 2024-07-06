@@ -224,5 +224,11 @@ impl Application for App {
 
 fn main() {
 	pretty_env_logger::init();
-	App::run(Settings::default()).unwrap();
+	App::run(Settings {
+		window: iced::window::Settings {
+			size: iced::Size::new(500.0, 400.0),
+			..iced::window::Settings::default()
+		},
+		..Settings::default()
+	}).unwrap();
 }
