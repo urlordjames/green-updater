@@ -6,7 +6,7 @@ pub async fn notify_upgrade_done() {
 	use ashpd::desktop::notification::{Notification, NotificationProxy};
 
 	if let Ok(proxy) = NotificationProxy::new().await {
-		let _ = proxy.add_notification("com.github.urlordjames.GreenUpdater",
+		let _ = proxy.add_notification("io.github.urlordjames.GreenUpdater",
 			Notification::new(NOTIFICATION_TITLE)
 				.body(NOTIFICATION_BODY)
 		).await;
