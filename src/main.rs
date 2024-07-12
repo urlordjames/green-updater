@@ -11,7 +11,6 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use green_lib::UpgradeStatus;
-use green_lib::util;
 
 mod notify;
 use notify::notify_upgrade_done;
@@ -35,7 +34,7 @@ enum UpgradeState {
 
 struct App {
 	url: url::Url,
-	mc_path: Arc<PathBuf>,
+	mc_path: Option<Arc<PathBuf>>,
 	upgrade_state: UpgradeState,
 	worker: Option<mpsc::Sender<UpgradeInfo>>,
 	can_select_path: bool
@@ -64,7 +63,10 @@ impl Application for App {
 	fn new(_flags: ()) -> (Self, Command<Message>) {
 		(Self {
 			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest2.json").unwrap(),
-			mc_path: Arc::new(util::minecraft_path()),
+			#[cfg(feature = "default-mc-path")]
+			mc_path: Some(Arc::new(green_lib::util::minecraft_path())),
+			#[cfg(not(feature = "default-mc-path"))]
+			mc_path: None,
 			upgrade_state: UpgradeState::Idle,
 			worker: None,
 			can_select_path: true
@@ -98,7 +100,7 @@ impl Application for App {
 			},
 			Message::SetMCPath(path) => {
 				if let Some(path) = path {
-					self.mc_path = Arc::new(path);
+					self.mc_path = Some(Arc::new(path));
 				}
 				self.can_select_path = true;
 				Command::none()
@@ -113,7 +115,7 @@ impl Application for App {
 			},
 			Message::DirectoryFetched(directory) => {
 				let worker = self.worker.as_ref().unwrap().clone();
-				let mc_path = self.mc_path.clone();
+				let mc_path = self.mc_path.clone().expect("button should only be clickable if mc_path is not None");
 
 				Command::perform(async move {
 					worker.send(UpgradeInfo {
@@ -157,7 +159,7 @@ impl Application for App {
 		let idle = self.can_select_path && matches!(self.upgrade_state, UpgradeState::Idle);
 
 		let mut upgrade_button = button("upgrade");
-		if idle {
+		if idle && self.mc_path.is_some() {
 			upgrade_button = upgrade_button.on_press(Message::Upgrade);
 		}
 
@@ -170,11 +172,17 @@ impl Application for App {
 			mouse_area(
 				text("green updater").size(50)
 			).on_press(Message::OpenProjectLink).into(),
-			text("(licensed under GPL-3.0 or later)").into(),
-			text(self.mc_path.display()).into(),
+			text("(licensed under GPL-3.0 or later)").into()
+		];
+
+		if let Some(mc_path) = &self.mc_path {
+			content.push(text(mc_path.display()).into());
+		}
+
+		content.extend([
 			select_button.into(),
 			upgrade_button.into()
-		];
+		]);
 
 		if let UpgradeState::Upgrading(status) = &self.upgrade_state {
 			content.push(progress_bar(0.0..=status.total, status.value).into());
