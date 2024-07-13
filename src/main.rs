@@ -76,6 +76,7 @@ impl Application for App {
 	fn title(&self) -> String {
 		match &self.upgrade_state {
 			UpgradeState::FetchingDirectory => String::from("green updater: fetching..."),
+			UpgradeState::Upgrading(status) if status.total == 0.0 => String::from("green updater: processing..."),
 			UpgradeState::Upgrading(status) => format!("green updater: {:.1}% downloaded", (status.value / status.total) * 100.0),
 			UpgradeState::Idle => String::from("green updater")
 		}
