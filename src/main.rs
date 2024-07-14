@@ -63,9 +63,9 @@ impl Application for App {
 	fn new(_flags: ()) -> (Self, Command<Message>) {
 		(Self {
 			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest2.json").unwrap(),
-			#[cfg(feature = "default-mc-path")]
+			#[cfg(not(feature = "flatpak"))]
 			mc_path: Some(Arc::new(green_lib::util::minecraft_path())),
-			#[cfg(not(feature = "default-mc-path"))]
+			#[cfg(feature = "flatpak")]
 			mc_path: None,
 			upgrade_state: UpgradeState::Idle,
 			worker: None,
@@ -94,8 +94,13 @@ impl Application for App {
 			},
 			Message::SelectMCPath => {
 				self.can_select_path = false;
+
+				let path_not_set = self.mc_path.is_none();
 				Command::perform(async move {
-					let dialog = rfd::AsyncFileDialog::new();
+					let mut dialog = rfd::AsyncFileDialog::new();
+					if path_not_set {
+						dialog = dialog.set_directory(green_lib::util::minecraft_path());
+					}
 					dialog.pick_folder().await.map(PathBuf::from)
 				}, Message::SetMCPath)
 			},
