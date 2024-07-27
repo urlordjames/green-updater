@@ -9,9 +9,10 @@ use tokio::sync::mpsc;
 
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::collections::HashMap;
 
 use green_lib::UpgradeStatus;
-use green_lib::packs::PacksListManifest;
+use green_lib::packs::{PacksListManifest, ManifestMetadata};
 
 mod notify;
 use notify::notify_upgrade_done;
@@ -36,7 +37,7 @@ enum UpgradeState {
 }
 
 struct App {
-	packs: Option<Arc<PacksListManifest>>,
+	packs: Option<Arc<HashMap<String, ManifestMetadata>>>,
 	selected_pack: Option<Arc<String>>,
 	mc_path: Option<Arc<PathBuf>>,
 	upgrade_state: UpgradeState,
@@ -58,15 +59,6 @@ enum Message {
 	UpgradeFinished,
 	PacksFetched(PacksListManifest),
 	SelectPack(String)
-}
-
-macro_rules! pack_selection {
-	($packs_list:ident, $selected_pack:ident) => {
-		match $selected_pack {
-			Some(pack) => $packs_list.packs.get(pack.as_ref()).expect("selected_pack should be valid").to_directory().await.unwrap(),
-			None => $packs_list.get_featured_pack_metadata().unwrap().to_directory().await.unwrap()
-		}
-	};
 }
 
 impl Application for App {
@@ -129,17 +121,11 @@ impl Application for App {
 			},
 			Message::Upgrade => {
 				self.upgrade_state = UpgradeState::FetchingDirectory;
-				let packs_list = self.packs.clone();
-				let selected_pack = self.selected_pack.clone();
+				let packs_list = self.packs.clone().expect("button should only be clickable if packs_list is not None");
+				let selected_pack = self.selected_pack.clone().expect("button should only be clickable if selected_back is not None");
 
 				Command::perform(async move {
-					match packs_list {
-						Some(packs_list) => pack_selection!(packs_list, selected_pack),
-						None => {
-							let packs_list = PacksListManifest::from_url(PACKS_URL).await.unwrap();
-							pack_selection!(packs_list, selected_pack)
-						}
-					}
+					packs_list.get(selected_pack.as_ref()).expect("selected_pack should be valid").to_directory().await.unwrap()
 				}, Message::DirectoryFetched)
 			},
 			Message::DirectoryFetched(directory) => {
@@ -181,11 +167,11 @@ impl Application for App {
 				self.upgrade_state = UpgradeState::Idle;
 				Command::none()
 			},
-			Message::PacksFetched(packs) => {
-				if let Some(featured_pack) = &packs.featured_pack {
-					self.selected_pack = Some(Arc::new(featured_pack.clone()));
+			Message::PacksFetched(packs_manifest) => {
+				if let Some(featured_pack) = packs_manifest.featured_pack {
+					self.selected_pack = Some(Arc::new(featured_pack));
 				}
-				self.packs = Some(Arc::new(packs));
+				self.packs = Some(Arc::new(packs_manifest.packs));
 				Command::none()
 			},
 			Message::SelectPack(pack_id) => {
@@ -199,7 +185,7 @@ impl Application for App {
 		let idle = self.can_select_path && matches!(self.upgrade_state, UpgradeState::Idle);
 
 		let mut upgrade_button = button("upgrade");
-		if idle && self.mc_path.is_some() {
+		if idle && self.mc_path.is_some() && self.packs.is_some() && self.selected_pack.is_some() {
 			upgrade_button = upgrade_button.on_press(Message::Upgrade);
 		}
 
@@ -216,7 +202,7 @@ impl Application for App {
 		];
 
 		if let Some(packs_list) = &self.packs {
-			let pack_ids: Vec<String> = packs_list.packs.keys().cloned().collect();
+			let pack_ids: Vec<String> = packs_list.keys().cloned().collect();
 			content.push(
 				pick_list(pack_ids, self.selected_pack.clone(), Message::SelectPack).into()
 			);
@@ -253,9 +239,8 @@ impl Application for App {
 			{
 				let mut output = output.clone();
 				tokio::spawn(async move {
-					if let Some(packs_list) = PacksListManifest::from_url(PACKS_URL).await {
-						output.send(Message::PacksFetched(packs_list)).await.unwrap();
-					}
+					let packs_list = PacksListManifest::from_url(PACKS_URL).await.unwrap();
+					output.send(Message::PacksFetched(packs_list)).await.unwrap();
 				});
 			}
 
