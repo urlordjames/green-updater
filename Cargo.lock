@@ -1289,6 +1289,7 @@ dependencies = [
  "ashpd 0.9.1",
  "green-lib",
  "iced",
+ "log",
  "open",
  "pretty_env_logger",
  "rfd",

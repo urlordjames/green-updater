@@ -15,7 +15,7 @@ use green_lib::UpgradeStatus;
 use green_lib::packs::{PacksListManifest, ManifestMetadata};
 
 mod notify;
-use notify::notify_upgrade_done;
+use notify::send_notification;
 
 const PACKS_URL: &str = "https://le-mod-bucket.s3.us-east-2.amazonaws.com/packs.json";
 
@@ -58,6 +58,7 @@ enum Message {
 	Tick,
 	UpgradeFinished,
 	PacksFetched(PacksListManifest),
+	FailedPackFetch,
 	SelectPack(Arc<PickListPack>)
 }
 
@@ -197,6 +198,10 @@ impl Application for App {
 				self.packs = Some(packs_manifest.packs);
 				Command::none()
 			},
+			Message::FailedPackFetch => {
+				log::error!("failed to fetch packs too many times, closing application");
+				iced::window::close(iced::window::Id::MAIN)
+			},
 			Message::SelectPack(pack) => {
 				self.selected_pack = Some(pack.clone());
 				Command::none()
@@ -274,7 +279,20 @@ impl Application for App {
 			{
 				let mut output = output.clone();
 				tokio::spawn(async move {
-					let packs_list = PacksListManifest::from_url(PACKS_URL).await.unwrap();
+					let packs_list = loop {
+						let mut retries = 0;
+						if let Some(packs) = PacksListManifest::from_url(PACKS_URL).await {
+							break packs;
+						} else {
+							retries += 1;
+							if retries >= 3 {
+								send_notification("FATAL ERROR: failed to fetch packs from server").await;
+								output.send(Message::FailedPackFetch).await.unwrap();
+								return;
+							}
+							log::warn!("failed to fetch packs, retrying");
+						}
+					};
 					output.send(Message::PacksFetched(packs_list)).await.unwrap();
 				});
 			}
@@ -294,7 +312,7 @@ impl Application for App {
 
 				handle.await.unwrap();
 				output.send(Message::UpgradeFinished).await.unwrap();
-				notify_upgrade_done().await;
+				send_notification("upgrade finished").await;
 			}
 
 			unreachable!()
