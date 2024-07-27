@@ -1284,7 +1284,7 @@ dependencies = [
 
 [[package]]
 name = "green-updater"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "ashpd 0.9.1",
  "green-lib",
