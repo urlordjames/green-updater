@@ -211,7 +211,7 @@ impl Application for App {
 		} else {
 			match &self.selected_pack {
 				Some(selected_pack) => content.push(text(format!("currently selected pack: {}", selected_pack)).into()),
-				None => unreachable!("upgrade button should only be clickable if selected_pack is not None")
+				None => content.push(text("no pack currently selected").into())
 			}
 		}
 
