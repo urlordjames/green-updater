@@ -62,7 +62,7 @@ impl Application for App {
 
 	fn new(_flags: ()) -> (Self, Command<Message>) {
 		(Self {
-			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/manifest2.json").unwrap(),
+			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/packs.json").unwrap(),
 			#[cfg(not(feature = "flatpak"))]
 			mc_path: Some(Arc::new(green_lib::util::minecraft_path())),
 			#[cfg(feature = "flatpak")]
@@ -116,7 +116,8 @@ impl Application for App {
 				let url = self.url.clone();
 
 				Command::perform(async move {
-					green_lib::Directory::from_url(url).await.unwrap()
+					let packs = green_lib::packs::PacksListManifest::from_url(url).await.unwrap();
+					packs.get_featured_pack_metadata().unwrap().to_directory().await.unwrap()
 				}, Message::DirectoryFetched)
 			},
 			Message::DirectoryFetched(directory) => {

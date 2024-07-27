@@ -1271,8 +1271,8 @@ dependencies = [
 
 [[package]]
 name = "green-lib"
-version = "0.7.0"
-source = "git+https://github.com/urlordjames/green-lib#d0b13f0f14b4dc2d587110638f699a47660cfc17"
+version = "0.7.1"
+source = "git+https://github.com/urlordjames/green-lib#314f85b71caa2e607adb556d88def66605be727b"
 dependencies = [
  "async-recursion",
  "reqwest",
