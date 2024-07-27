@@ -19,7 +19,6 @@ default-features = false
 features = [ "xdg-portal", "tokio" ]
 
 [dependencies]
-url = "2.5"
 tokio = "1.39"
 open = "5.3"
 pretty_env_logger = "0.5"

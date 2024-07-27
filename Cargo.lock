@@ -1294,7 +1294,6 @@ dependencies = [
  "rfd",
  "tauri-winrt-notification",
  "tokio",
- "url",
 ]
 
 [[package]]

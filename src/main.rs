@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use iced::widget::{button, Column, container, text, progress_bar, mouse_area};
+use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list};
 use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
 use iced::futures::SinkExt;
 use iced::subscription::channel;
@@ -11,9 +11,12 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use green_lib::UpgradeStatus;
+use green_lib::packs::PacksListManifest;
 
 mod notify;
 use notify::notify_upgrade_done;
+
+const PACKS_URL: &str = "https://le-mod-bucket.s3.us-east-2.amazonaws.com/packs.json";
 
 struct UpgradingStatus {
 	total: f32,
@@ -33,7 +36,8 @@ enum UpgradeState {
 }
 
 struct App {
-	url: url::Url,
+	packs: Option<Arc<PacksListManifest>>,
+	selected_pack: Option<Arc<String>>,
 	mc_path: Option<Arc<PathBuf>>,
 	upgrade_state: UpgradeState,
 	worker: Option<mpsc::Sender<UpgradeInfo>>,
@@ -51,7 +55,18 @@ enum Message {
 	UpgradeInProgress,
 	SetLength(f32),
 	Tick,
-	UpgradeFinished
+	UpgradeFinished,
+	PacksFetched(PacksListManifest),
+	SelectPack(String)
+}
+
+macro_rules! pack_selection {
+	($packs_list:ident, $selected_pack:ident) => {
+		match $selected_pack {
+			Some(pack) => $packs_list.packs.get(pack.as_ref()).expect("selected_pack should be valid").to_directory().await.unwrap(),
+			None => $packs_list.get_featured_pack_metadata().unwrap().to_directory().await.unwrap()
+		}
+	};
 }
 
 impl Application for App {
@@ -62,7 +77,8 @@ impl Application for App {
 
 	fn new(_flags: ()) -> (Self, Command<Message>) {
 		(Self {
-			url: url::Url::parse("https://s3-us-east-2.amazonaws.com/le-mod-bucket/packs.json").unwrap(),
+			packs: None,
+			selected_pack: None,
 			#[cfg(not(feature = "flatpak"))]
 			mc_path: Some(Arc::new(green_lib::util::minecraft_path())),
 			#[cfg(feature = "flatpak")]
@@ -113,11 +129,17 @@ impl Application for App {
 			},
 			Message::Upgrade => {
 				self.upgrade_state = UpgradeState::FetchingDirectory;
-				let url = self.url.clone();
+				let packs_list = self.packs.clone();
+				let selected_pack = self.selected_pack.clone();
 
 				Command::perform(async move {
-					let packs = green_lib::packs::PacksListManifest::from_url(url).await.unwrap();
-					packs.get_featured_pack_metadata().unwrap().to_directory().await.unwrap()
+					match packs_list {
+						Some(packs_list) => pack_selection!(packs_list, selected_pack),
+						None => {
+							let packs_list = PacksListManifest::from_url(PACKS_URL).await.unwrap();
+							pack_selection!(packs_list, selected_pack)
+						}
+					}
 				}, Message::DirectoryFetched)
 			},
 			Message::DirectoryFetched(directory) => {
@@ -158,6 +180,14 @@ impl Application for App {
 			Message::UpgradeFinished => {
 				self.upgrade_state = UpgradeState::Idle;
 				Command::none()
+			},
+			Message::PacksFetched(packs) => {
+				self.packs = Some(Arc::new(packs));
+				Command::none()
+			},
+			Message::SelectPack(pack_id) => {
+				self.selected_pack = Some(Arc::new(pack_id));
+				Command::none()
 			}
 		}
 	}
@@ -179,8 +209,15 @@ impl Application for App {
 			mouse_area(
 				text("green updater").size(50)
 			).on_press(Message::OpenProjectLink).into(),
-			text("(licensed under GPL-3.0 or later)").into()
+			text("(licensed under GPL-3.0 or later)").into(),
 		];
+
+		if let Some(packs_list) = &self.packs {
+			let pack_ids: Vec<String> = packs_list.packs.keys().cloned().collect();
+			content.push(
+				pick_list(pack_ids, packs_list.featured_pack.clone(), Message::SelectPack).into()
+			);
+		}
 
 		if let Some(mc_path) = &self.mc_path {
 			content.push(text(mc_path.display()).into());
@@ -209,6 +246,15 @@ impl Application for App {
 		channel(0, 128, |mut output| async move {
 			let (tx, mut rx) = mpsc::channel(128);
 			output.send(Message::WorkerReady(tx)).await.unwrap();
+
+			{
+				let mut output = output.clone();
+				tokio::spawn(async move {
+					if let Some(packs_list) = PacksListManifest::from_url(PACKS_URL).await {
+						output.send(Message::PacksFetched(packs_list)).await.unwrap();
+					}
+				});
+			}
 
 			while let Some(update) = rx.recv().await {
 				let (tx, mut rx) = mpsc::channel(128);
