@@ -37,8 +37,8 @@ enum UpgradeState {
 }
 
 struct App {
-	packs: Option<Arc<HashMap<String, ManifestMetadata>>>,
-	selected_pack: Option<Arc<String>>,
+	packs: Option<HashMap<String, ManifestMetadata>>,
+	selected_pack: Option<Arc<PickListPack>>,
 	mc_path: Option<Arc<PathBuf>>,
 	upgrade_state: UpgradeState,
 	worker: Option<mpsc::Sender<UpgradeInfo>>,
@@ -58,7 +58,25 @@ enum Message {
 	Tick,
 	UpgradeFinished,
 	PacksFetched(PacksListManifest),
-	SelectPack(String)
+	SelectPack(Arc<PickListPack>)
+}
+
+#[derive(Debug)]
+struct PickListPack {
+	id: String,
+	display_name: String
+}
+
+impl std::fmt::Display for PickListPack {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(f, "{}", self.display_name)
+	}
+}
+
+impl PartialEq for PickListPack {
+	fn eq(&self, other: &Self) -> bool {
+		self.id == other.id
+	}
 }
 
 impl Application for App {
@@ -121,11 +139,12 @@ impl Application for App {
 			},
 			Message::Upgrade => {
 				self.upgrade_state = UpgradeState::FetchingDirectory;
-				let packs_list = self.packs.clone().expect("button should only be clickable if packs_list is not None");
-				let selected_pack = self.selected_pack.clone().expect("button should only be clickable if selected_back is not None");
+				let packs_list = self.packs.as_ref().expect("button should only be clickable if packs_list is not None");
+				let selected_pack = self.selected_pack.as_ref().expect("button should only be clickable if selected_back is not None");
+				let metadata = packs_list.get(&selected_pack.id).expect("selected_pack should be valid").clone();
 
 				Command::perform(async move {
-					packs_list.get(selected_pack.as_ref()).expect("selected_pack should be valid").to_directory().await.unwrap()
+					metadata.to_directory().await.unwrap()
 				}, Message::DirectoryFetched)
 			},
 			Message::DirectoryFetched(directory) => {
@@ -169,13 +188,17 @@ impl Application for App {
 			},
 			Message::PacksFetched(packs_manifest) => {
 				if let Some(featured_pack) = packs_manifest.featured_pack {
-					self.selected_pack = Some(Arc::new(featured_pack));
+					let pick_list_pack = PickListPack {
+						display_name: packs_manifest.packs.get(&featured_pack).unwrap().display_name.clone(),
+						id: featured_pack.clone()
+					};
+					self.selected_pack = Some(Arc::new(pick_list_pack));
 				}
-				self.packs = Some(Arc::new(packs_manifest.packs));
+				self.packs = Some(packs_manifest.packs);
 				Command::none()
 			},
-			Message::SelectPack(pack_id) => {
-				self.selected_pack = Some(Arc::new(pack_id));
+			Message::SelectPack(pack) => {
+				self.selected_pack = Some(pack.clone());
 				Command::none()
 			}
 		}
@@ -203,10 +226,15 @@ impl Application for App {
 
 		if idle {
 			if let Some(packs_list) = &self.packs {
-				let pack_ids: Vec<String> = packs_list.keys().cloned().collect();
+				let packs: Vec<Arc<PickListPack>> = packs_list.iter().map(|p| Arc::new(PickListPack {
+					id: p.0.clone(),
+					display_name: p.1.display_name.clone()
+				})).collect();
 				content.push(
-					pick_list(pack_ids, self.selected_pack.clone(), Message::SelectPack).into()
+					pick_list(packs, self.selected_pack.clone(), Message::SelectPack).into()
 				);
+			} else {
+				content.push(text("fetching packs...").into());
 			}
 		} else {
 			match &self.selected_pack {
