@@ -201,11 +201,18 @@ impl Application for App {
 			text("(licensed under GPL-3.0 or later)").into(),
 		];
 
-		if let Some(packs_list) = &self.packs {
-			let pack_ids: Vec<String> = packs_list.keys().cloned().collect();
-			content.push(
-				pick_list(pack_ids, self.selected_pack.clone(), Message::SelectPack).into()
-			);
+		if idle {
+			if let Some(packs_list) = &self.packs {
+				let pack_ids: Vec<String> = packs_list.keys().cloned().collect();
+				content.push(
+					pick_list(pack_ids, self.selected_pack.clone(), Message::SelectPack).into()
+				);
+			}
+		} else {
+			match &self.selected_pack {
+				Some(selected_pack) => content.push(text(format!("currently selected pack: {}", selected_pack)).into()),
+				None => unreachable!("upgrade button should only be clickable if selected_pack is not None")
+			}
 		}
 
 		if let Some(mc_path) = &self.mc_path {
