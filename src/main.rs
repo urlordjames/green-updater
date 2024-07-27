@@ -182,6 +182,9 @@ impl Application for App {
 				Command::none()
 			},
 			Message::PacksFetched(packs) => {
+				if let Some(featured_pack) = &packs.featured_pack {
+					self.selected_pack = Some(Arc::new(featured_pack.clone()));
+				}
 				self.packs = Some(Arc::new(packs));
 				Command::none()
 			},
@@ -215,7 +218,7 @@ impl Application for App {
 		if let Some(packs_list) = &self.packs {
 			let pack_ids: Vec<String> = packs_list.packs.keys().cloned().collect();
 			content.push(
-				pick_list(pack_ids, packs_list.featured_pack.clone(), Message::SelectPack).into()
+				pick_list(pack_ids, self.selected_pack.clone(), Message::SelectPack).into()
 			);
 		}
 
