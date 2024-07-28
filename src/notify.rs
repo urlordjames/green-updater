@@ -1,7 +1,7 @@
 const NOTIFICATION_TITLE: &str = "Green Updater";
 
 #[cfg(target_os = "linux")]
-pub async fn send_notification(body: &str) {
+pub async fn send_notification(body: &'static str) {
 	use ashpd::desktop::notification::{Notification, NotificationProxy};
 
 	if let Ok(proxy) = NotificationProxy::new().await {
@@ -13,7 +13,7 @@ pub async fn send_notification(body: &str) {
 }
 
 #[cfg(target_os = "windows")]
-pub async fn send_notification(body: &str) {
+pub async fn send_notification(body: &'static str) {
 	use tauri_winrt_notification::{Toast, Duration, Scenario};
 
 	tokio::task::spawn_blocking(move || {
@@ -27,6 +27,6 @@ pub async fn send_notification(body: &str) {
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "windows")))]
-pub async fn send_notification(_body: &str) {
+pub async fn send_notification(_body: &'static str) {
 	// not implemented
 }
