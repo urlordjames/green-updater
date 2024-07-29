@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip};
+use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip, theme};
 use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
 use iced::futures::SinkExt;
 use iced::subscription::channel;
@@ -268,7 +268,8 @@ impl Application for App {
 			tooltip!(tooltip_text, self.selected_pack.is_none(), "you have not selected a pack");
 			tooltip!(tooltip_text, self.mc_path.is_none(), "Minecraft path is not set");
 
-			let tooltip = tooltip(upgrade_button, text(tooltip_text), tooltip::Position::FollowCursor);
+			let tooltip = tooltip(upgrade_button, text(tooltip_text), tooltip::Position::FollowCursor)
+				.style(theme::Container::Box);
 			content.push(tooltip.into());
 		}
 
