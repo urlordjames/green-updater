@@ -263,10 +263,11 @@ impl Application for App {
 		} else {
 			let mut tooltip_text = String::from("can't upgrade because:");
 
-			tooltip!(tooltip_text, !idle, "already upgrading");
+			tooltip!(tooltip_text, !matches!(self.upgrade_state, UpgradeState::Idle), "currently working on an upgrade");
 			tooltip!(tooltip_text, self.packs.is_none(), "currently fetching packs from server");
 			tooltip!(tooltip_text, self.selected_pack.is_none(), "you have not selected a pack");
-			tooltip!(tooltip_text, self.mc_path.is_none(), "Minecraft path is not set");
+			tooltip!(tooltip_text, !self.can_select_path, "you are currently selecting a Minecraft folder");
+			tooltip!(tooltip_text, self.mc_path.is_none(), "you have not selected a Minecraft folder");
 
 			let tooltip = tooltip(upgrade_button, text(tooltip_text), tooltip::Position::FollowCursor)
 				.style(theme::Container::Box);
