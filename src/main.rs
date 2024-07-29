@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list};
+use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip};
 use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
 use iced::futures::SinkExt;
 use iced::subscription::channel;
@@ -78,6 +78,15 @@ impl PartialEq for PickListPack {
 	fn eq(&self, other: &Self) -> bool {
 		self.id == other.id
 	}
+}
+
+macro_rules! tooltip {
+	($text:ident, $e:expr, $t:literal) => {
+		if $e {
+			$text.push('\n');
+			$text.push_str($t);
+		}
+	};
 }
 
 impl Application for App {
@@ -212,16 +221,6 @@ impl Application for App {
 	fn view(&self) -> Element<Message> {
 		let idle = self.can_select_path && matches!(self.upgrade_state, UpgradeState::Idle);
 
-		let mut upgrade_button = button("upgrade");
-		if idle && self.mc_path.is_some() && self.packs.is_some() && self.selected_pack.is_some() {
-			upgrade_button = upgrade_button.on_press(Message::Upgrade);
-		}
-
-		let mut select_button = button("select Minecraft folder");
-		if idle {
-			select_button = select_button.on_press(Message::SelectMCPath);
-		}
-
 		let mut content = vec![
 			mouse_area(
 				text("green updater").size(50)
@@ -252,10 +251,26 @@ impl Application for App {
 			content.push(text(mc_path.display()).into());
 		}
 
-		content.extend([
-			select_button.into(),
-			upgrade_button.into()
-		]);
+		let mut select_button = button("select Minecraft folder");
+		if idle {
+			select_button = select_button.on_press(Message::SelectMCPath);
+		}
+		content.push(select_button.into());
+
+		let upgrade_button = button("upgrade");
+		if idle && self.packs.is_some() && self.selected_pack.is_some() && self.mc_path.is_some() {
+			content.push(upgrade_button.on_press(Message::Upgrade).into());
+		} else {
+			let mut tooltip_text = String::from("can't upgrade because:");
+
+			tooltip!(tooltip_text, !idle, "already upgrading");
+			tooltip!(tooltip_text, self.packs.is_none(), "currently fetching packs from server");
+			tooltip!(tooltip_text, self.selected_pack.is_none(), "you have not selected a pack");
+			tooltip!(tooltip_text, self.mc_path.is_none(), "Minecraft path is not set");
+
+			let tooltip = tooltip(upgrade_button, text(tooltip_text), tooltip::Position::FollowCursor);
+			content.push(tooltip.into());
+		}
 
 		if let UpgradeState::Upgrading(status) = &self.upgrade_state {
 			content.push(progress_bar(0.0..=status.total, status.value).into());
