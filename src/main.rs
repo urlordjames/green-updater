@@ -296,8 +296,9 @@ impl Application for App {
 			{
 				let mut output = output.clone();
 				tokio::spawn(async move {
+					let mut retries = 0;
+
 					let packs_list = loop {
-						let mut retries = 0;
 						if let Some(packs) = PacksListManifest::from_url(PACKS_URL).await {
 							break packs;
 						} else {
