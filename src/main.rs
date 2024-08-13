@@ -131,12 +131,17 @@ impl Application for App {
 			Message::SelectMCPath => {
 				self.can_select_path = false;
 
+				#[cfg(feature = "flatpak")]
 				let path_not_set = self.mc_path.is_none();
+
 				Command::perform(async move {
-					let mut dialog = rfd::AsyncFileDialog::new();
-					if path_not_set {
-						dialog = dialog.set_directory(green_lib::util::minecraft_path());
-					}
+					let dialog = rfd::AsyncFileDialog::new();
+
+					#[cfg(feature = "flatpak")]
+					let dialog = if path_not_set {
+						dialog.set_directory(green_lib::util::minecraft_path())
+					} else { dialog };
+
 					dialog.pick_folder().await.map(PathBuf::from)
 				}, Message::SetMCPath)
 			},
