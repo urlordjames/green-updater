@@ -5,6 +5,7 @@ use aws_credential_types::Credentials;
 use aws_credential_types::provider::ProvideCredentials as ProvideCredentialsTrait;
 use aws_credential_types::provider::future::ProvideCredentials;
 use aws_credential_types::provider::Result as CredsResult;
+use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 // these are not secret because it ONLY has permissions to add new logs
@@ -36,6 +37,7 @@ pub fn setup_logging() {
 	let client = aws_sdk_cloudwatchlogs::Client::new(&config);
 
 	tracing_subscriber::registry::Registry::default()
+		.with(LevelFilter::WARN)
 		.with(tracing_cloudwatch::layer().with_client(
 			client,
 			tracing_cloudwatch::ExportConfig::default()
