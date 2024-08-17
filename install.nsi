@@ -3,6 +3,7 @@
 SetCompressor /FINAL /SOLID LZMA
 
 !insertmacro MUI_PAGE_LICENSE "LICENSE"
+!insertmacro MUI_PAGE_LICENSE "PRIVACY_POLICY"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 
