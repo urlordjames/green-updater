@@ -1,6 +1,8 @@
 # green-updater
 A graphical frontend to update Minecraft modpacks.
 
+By using this software built with the `cloud-logging` feature (not enabled by default) you must also agree to the `PRIVACY_POLICY`.
+
 # FAQ
 Q: program won't run because I don't have `VCRUNTIME140.dll`
 
