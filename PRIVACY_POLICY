@@ -7,7 +7,7 @@ Despite this document not being legally binding, it is provided to help you make
 Data Collected
 
 The Green Updater collects the following types of data:
-- application warnings and errors generated from the use of this software
+- application logs and debugging information generated from the use of this software
 	- this include timestamps
 	- this may include information regarding your use of the software
 	- this may include information about your hardware or operating system
