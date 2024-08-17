@@ -1,4 +1,4 @@
-#![cfg_attr(not(feature = "env-logging"), windows_subsystem = "windows")]
+#![cfg_attr(feature = "env-logging", windows_subsystem = "windows")]
 
 use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip, theme};
 use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
