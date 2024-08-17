@@ -49,4 +49,6 @@ pub fn setup_logging() {
 			.with_code_location(true)
 			.with_target(false)
 		).init();
+
+	std::panic::set_hook(Box::new(tracing_panic::panic_hook));
 }
