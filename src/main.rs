@@ -15,6 +15,12 @@ use green_lib::packs::{PacksListManifest, ManifestMetadata};
 mod notify;
 use notify::send_notification;
 
+#[cfg(feature = "cloud-logging")]
+mod cloud_logging;
+
+#[cfg(all(feature = "cloud-logging", feature = "env-logging"))]
+compile_error!("the features `cloud-logging` and `env-logging` are mutually exclusive");
+
 const PACKS_URL: &str = "https://le-mod-bucket.s3.us-east-2.amazonaws.com/packs.json";
 
 struct UpgradingStatus {
@@ -293,6 +299,9 @@ impl Application for App {
 
 	fn subscription(&self) -> Subscription<Message> {
 		channel(0, 128, |mut output| async move {
+			#[cfg(feature = "cloud-logging")]
+			cloud_logging::setup_logging();
+
 			let (tx, mut rx) = mpsc::channel(128);
 			output.send(Message::WorkerReady(tx)).await.unwrap();
 
@@ -346,7 +355,9 @@ impl Application for App {
 }
 
 fn main() {
+	#[cfg(feature = "env-logging")]
 	pretty_env_logger::init();
+
 	App::run(Settings {
 		window: iced::window::Settings {
 			size: iced::Size::new(500.0, 400.0),

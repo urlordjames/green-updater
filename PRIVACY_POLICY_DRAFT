@@ -35,4 +35,4 @@ Keep in mind that we delete data no more than one week after it is collected.
 
 Opt Out of Processing
 
-You may opt out by building the Green Updater from source using the `no-cloud-logs` feature, this will disable all data collection.
+You may opt out by building the Green Updater from source without using the `cloud-logging` feature (which is the default option), this will disable all data collection.
