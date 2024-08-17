@@ -27,7 +27,7 @@ jobs:
 
     - uses: dtolnay/rust-toolchain@stable
     - name: "build"
-      run: cargo build --release
+      run: cargo build --release --no-default-features --features cloud-logging
 
     - name: "make installer"
       run: makensis install.nsi
