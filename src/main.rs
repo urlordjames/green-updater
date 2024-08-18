@@ -20,6 +20,9 @@ use notify::send_notification;
 #[cfg(feature = "cloud-logging")]
 mod cloud_logging;
 
+#[cfg(feature = "cloud-logging")]
+compile_error!("bruh AWS made me take this down");
+
 #[cfg(all(feature = "cloud-logging", feature = "env-logging"))]
 compile_error!("the features `cloud-logging` and `env-logging` are mutually exclusive");
 
