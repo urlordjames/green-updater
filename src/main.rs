@@ -1,5 +1,3 @@
-#![cfg_attr(not(feature = "env-logging"), windows_subsystem = "windows")]
-
 use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip, theme};
 use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
 use iced::futures::SinkExt;
@@ -17,14 +15,11 @@ use green_lib::packs::{PacksListManifest, ManifestMetadata};
 mod notify;
 use notify::send_notification;
 
-#[cfg(feature = "cloud-logging")]
-mod cloud_logging;
+#[cfg(all(feature = "file-logging", feature = "env-logging"))]
+compile_error!("the features `file-logging` and `env-logging` are mutually exclusive");
 
-#[cfg(feature = "cloud-logging")]
-compile_error!("bruh AWS made me take this down");
-
-#[cfg(all(feature = "cloud-logging", feature = "env-logging"))]
-compile_error!("the features `cloud-logging` and `env-logging` are mutually exclusive");
+#[cfg(feature = "file-logging")]
+mod file_logging;
 
 const PACKS_URL: &str = "https://le-mod-bucket.s3.us-east-2.amazonaws.com/packs.json";
 
@@ -304,9 +299,6 @@ impl Application for App {
 
 	fn subscription(&self) -> Subscription<Message> {
 		channel(0, 128, |mut output| async move {
-			#[cfg(feature = "cloud-logging")]
-			cloud_logging::setup_logging();
-
 			let (tx, mut rx) = mpsc::channel(128);
 			output.send(Message::WorkerReady(tx)).await.unwrap();
 
@@ -362,6 +354,9 @@ impl Application for App {
 fn main() {
 	#[cfg(feature = "env-logging")]
 	pretty_env_logger::init();
+
+	#[cfg(feature = "file-logging")]
+	let _guard = file_logging::setup_logging();
 
 	App::run(Settings {
 		window: iced::window::Settings {

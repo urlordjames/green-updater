@@ -18,30 +18,12 @@ version = "0.14"
 default-features = false
 features = [ "xdg-portal", "tokio" ]
 
-[dependencies.tracing-cloudwatch]
-version = "0.1"
-optional = true
-features = [ "awssdk" ]
-
 [dependencies.tracing-subscriber]
 version = "0.3"
 optional = true
 
-[dependencies.aws-config]
-version = "1.5"
-optional = true
-
-[dependencies.aws-types]
-version = "1.3"
-optional = true
-
-[dependencies.aws-credential-types]
-version = "1.2"
-optional = true
-features = [ "hardcoded-credentials" ]
-
-[dependencies.aws-sdk-cloudwatchlogs]
-version = "1"
+[dependencies.tracing-appender]
+version = "0.2"
 optional = true
 
 [dependencies.tracing-panic]
@@ -69,7 +51,7 @@ default-features = false
 lto = "fat"
 
 [features]
-default = [ "env-logging" ]
-flatpak = []
+default = [ "file-logging" ]
+flatpak = [ "env-logging" ]
 env-logging = [ "pretty_env_logger" ]
-cloud-logging = [ "tracing-cloudwatch", "tracing-subscriber", "aws-config", "aws-types", "aws-credential-types", "aws-sdk-cloudwatchlogs", "tracing-panic" ]
+file-logging = [ "tracing-subscriber", "tracing-appender", "tracing-panic" ]
