@@ -10,7 +10,7 @@ pub fn setup_logging() -> WorkerGuard {
 	let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
 
 	tracing_subscriber::fmt()
-		.with_max_level(LevelFilter::WARN)
+		.with_max_level(LevelFilter::DEBUG)
 		.with_writer(non_blocking)
 		.init();
 
