@@ -11,6 +11,7 @@ pub fn setup_logging() -> WorkerGuard {
 
 	tracing_subscriber::fmt()
 		.with_max_level(LevelFilter::DEBUG)
+		.with_ansi(false)
 		.with_writer(non_blocking)
 		.init();
 
