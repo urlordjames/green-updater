@@ -1,9 +1,10 @@
 #![cfg_attr(not(feature = "env-logging"), windows_subsystem = "windows")]
 
-use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip, theme};
-use iced::{Alignment, Application, Command, Length, Subscription, Element, Settings, Theme};
-use iced::futures::SinkExt;
-use iced::subscription::channel;
+use iced::widget::{button, Column, container, text, progress_bar, mouse_area, pick_list, tooltip};
+use iced::{Length, Task, Subscription, Element, Theme};
+use iced::alignment::Horizontal;
+use iced::futures::{Stream, SinkExt};
+use iced::stream::channel;
 
 use tokio::sync::mpsc;
 
@@ -95,14 +96,9 @@ macro_rules! tooltip {
 	};
 }
 
-impl Application for App {
-	type Message = Message;
-	type Theme = Theme;
-	type Executor = iced::executor::Default;
-	type Flags = ();
-
-	fn new(_flags: ()) -> (Self, Command<Message>) {
-		(Self {
+impl Default for App {
+	fn default() -> Self {
+		Self {
 			packs: None,
 			selected_pack: None,
 			#[cfg(not(feature = "flatpak"))]
@@ -112,9 +108,11 @@ impl Application for App {
 			upgrade_state: UpgradeState::Idle,
 			worker: None,
 			can_select_path: true
-		}, Command::none())
+		}
 	}
+}
 
+impl App {
 	fn title(&self) -> String {
 		match &self.upgrade_state {
 			UpgradeState::FetchingDirectory => String::from("green updater: fetching..."),
@@ -124,15 +122,15 @@ impl Application for App {
 		}
 	}
 
-	fn update(&mut self, message: Message) -> Command<Message> {
+	fn update(&mut self, message: Message) -> Task<Message> {
 		match message {
 			Message::WorkerReady(worker) => {
 				self.worker = Some(worker);
-				Command::none()
+				Task::none()
 			},
 			Message::OpenProjectLink => {
 				open::that_detached("https://github.com/urlordjames/green-updater").unwrap();
-				Command::none()
+				Task::none()
 			},
 			Message::SelectMCPath => {
 				self.can_select_path = false;
@@ -140,7 +138,7 @@ impl Application for App {
 				#[cfg(feature = "flatpak")]
 				let path_not_set = self.mc_path.is_none();
 
-				Command::perform(async move {
+				Task::perform(async move {
 					let dialog = rfd::AsyncFileDialog::new();
 
 					#[cfg(feature = "flatpak")]
@@ -156,7 +154,7 @@ impl Application for App {
 					self.mc_path = Some(Arc::new(path));
 				}
 				self.can_select_path = true;
-				Command::none()
+				Task::none()
 			},
 			Message::Upgrade => {
 				self.upgrade_state = UpgradeState::FetchingDirectory;
@@ -164,7 +162,7 @@ impl Application for App {
 				let selected_pack = self.selected_pack.as_ref().expect("button should only be clickable if selected_back is not None");
 				let metadata = packs_list.get(&selected_pack.id).expect("selected_pack should be valid").clone();
 
-				Command::perform(async move {
+				Task::perform(async move {
 					metadata.to_directory().await.unwrap()
 				}, Message::DirectoryFetched)
 			},
@@ -172,7 +170,7 @@ impl Application for App {
 				let worker = self.worker.as_ref().unwrap().clone();
 				let mc_path = self.mc_path.clone().expect("button should only be clickable if mc_path is not None");
 
-				Command::perform(async move {
+				Task::perform(async move {
 					worker.send(UpgradeInfo {
 						directory,
 						mc_path
@@ -185,7 +183,7 @@ impl Application for App {
 					value: 0.0
 				});
 
-				Command::none()
+				Task::none()
 			},
 			Message::SetLength(length) => {
 				match &mut self.upgrade_state {
@@ -193,7 +191,7 @@ impl Application for App {
 					_ => unreachable!()
 				}
 
-				Command::none()
+				Task::none()
 			},
 			Message::Tick => {
 				match &mut self.upgrade_state {
@@ -201,11 +199,11 @@ impl Application for App {
 					_ => unreachable!()
 				}
 
-				Command::none()
+				Task::none()
 			},
 			Message::UpgradeFinished => {
 				self.upgrade_state = UpgradeState::Idle;
-				Command::none()
+				Task::none()
 			},
 			Message::PacksFetched(packs_manifest) => {
 				if let Some(featured_pack) = packs_manifest.featured_pack {
@@ -216,15 +214,15 @@ impl Application for App {
 					self.selected_pack = Some(Arc::new(pick_list_pack));
 				}
 				self.packs = Some(packs_manifest.packs);
-				Command::none()
+				Task::none()
 			},
 			Message::FailedPackFetch => {
 				log::error!("failed to fetch packs too many times, closing application");
-				iced::window::close(iced::window::Id::MAIN)
+				iced::window::get_oldest().and_then(iced::window::close)
 			},
 			Message::SelectPack(pack) => {
 				self.selected_pack = Some(pack.clone());
-				Command::none()
+				Task::none()
 			}
 		}
 	}
@@ -259,7 +257,7 @@ impl Application for App {
 		}
 
 		if let Some(mc_path) = &self.mc_path {
-			content.push(text(mc_path.display()).into());
+			content.push(text(mc_path.to_str().unwrap()).into());
 		}
 
 		let mut select_button = button("select Minecraft folder");
@@ -281,7 +279,7 @@ impl Application for App {
 			tooltip!(tooltip_text, self.mc_path.is_none(), "you have not selected a Minecraft folder");
 
 			let tooltip = tooltip(upgrade_button, text(tooltip_text), tooltip::Position::FollowCursor)
-				.style(theme::Container::Box);
+				.style(iced::widget::container::bordered_box);
 			content.push(tooltip.into());
 		}
 
@@ -289,18 +287,19 @@ impl Application for App {
 			content.push(progress_bar(0.0..=status.total, status.value).into());
 		}
 
-		let content = Column::with_children(content).align_items(Alignment::Center);
+		let content = Column::with_children(content).align_x(Horizontal::Center);
 
 		container(content)
-			.width(Length::Fill)
-			.height(Length::Fill)
-			.center_x()
-			.center_y()
+			.center(Length::Fill)
 			.into()
 	}
 
 	fn subscription(&self) -> Subscription<Message> {
-		channel(0, 128, |mut output| async move {
+		Subscription::run(Self::worker)
+	}
+
+	fn worker() -> impl Stream<Item = Message> {
+		channel(128, |mut output| async move {
 			let (tx, mut rx) = mpsc::channel(128);
 			output.send(Message::WorkerReady(tx)).await.unwrap();
 
@@ -360,11 +359,12 @@ fn main() {
 	#[cfg(feature = "file-logging")]
 	let _guard = file_logging::setup_logging();
 
-	App::run(Settings {
-		window: iced::window::Settings {
+	iced::application(App::title, App::update, App::view)
+		.subscription(App::subscription)
+		.theme(App::theme)
+		.window(iced::window::Settings {
 			size: iced::Size::new(500.0, 400.0),
 			..iced::window::Settings::default()
-		},
-		..Settings::default()
-	}).unwrap();
+		})
+		.run().unwrap();
 }

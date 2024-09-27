@@ -6,7 +6,7 @@ authors = ["urlordjames <32751441+urlordjames@users.noreply.github.com>"]
 license = "GPL-3.0+"
 
 [dependencies.iced]
-version = "0.12"
+version = "0.13"
 features = [ "tokio" ]
 
 [dependencies.green-lib]
@@ -14,7 +14,7 @@ version = "0.7"
 git = "https://github.com/urlordjames/green-lib"
 
 [dependencies.rfd]
-version = "0.14"
+version = "0.15"
 default-features = false
 features = [ "xdg-portal", "tokio" ]
 
