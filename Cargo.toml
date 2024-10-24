@@ -35,7 +35,7 @@ version = "0.5"
 optional = true
 
 [dependencies]
-tokio = "1.39"
+tokio = "1"
 open = "5.3"
 log = "0.4"
 
