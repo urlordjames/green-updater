@@ -43,7 +43,7 @@ log = "0.4"
 tauri-winrt-notification = "0.6"
 
 [target.'cfg(target_os = "linux")'.dependencies.ashpd]
-version = "0.9"
+version = "0.10"
 features = [ "tokio" ]
 default-features = false
 
